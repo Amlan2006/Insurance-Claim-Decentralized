@@ -1,0 +1,2641 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>InsureChain - Decentralized Insurance Platform</title>
+    <script src="https://cdn.jsdelivr.net/npm/ethers@5/dist/ethers.umd.min.js" type="application/javascript"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 100%);
+            color: #e0e7ff;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .background-gradient {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(99, 102, 241, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(168, 85, 247, 0.15) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            margin-bottom: 40px;
+            border-bottom: 1px solid rgba(99, 102, 241, 0.2);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 28px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        .wallet-section {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .wallet-address {
+            padding: 12px 24px;
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            border-radius: 12px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            color: #a5b4fc;
+        }
+
+        .role-badge {
+            padding: 8px 20px;
+            background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            background: rgba(15, 23, 42, 0.6);
+            padding: 8px;
+            border-radius: 16px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+        }
+
+        .tab {
+            padding: 12px 28px;
+            background: transparent;
+            border: none;
+            color: #94a3b8;
+            cursor: pointer;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .tab:hover {
+            color: #e0e7ff;
+            background: rgba(99, 102, 241, 0.1);
+        }
+
+        .tab.active {
+            background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+            color: white;
+            box-shadow: 0 4px 20px rgba(99, 102, 241, 0.4);
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .card {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 25px;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            border-color: rgba(99, 102, 241, 0.4);
+            box-shadow: 0 8px 32px rgba(99, 102, 241, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .card-title {
+            font-size: 24px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #e0e7ff 0%, #a5b4fc 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 25px;
+            margin-top: 25px;
+        }
+
+        .policy-card {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(168, 85, 247, 0.1) 100%);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            border-radius: 16px;
+            padding: 25px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .policy-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #6366f1 0%, #a855f7 100%);
+        }
+
+        .policy-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px rgba(99, 102, 241, 0.25);
+            border-color: rgba(99, 102, 241, 0.5);
+        }
+
+        .policy-type {
+            display: inline-block;
+            padding: 6px 16px;
+            background: rgba(99, 102, 241, 0.2);
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #a5b4fc;
+        }
+
+        .policy-amount {
+            font-size: 32px;
+            font-weight: 700;
+            margin: 15px 0;
+            background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .policy-details {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin: 20px 0;
+            padding: 15px 0;
+            border-top: 1px solid rgba(99, 102, 241, 0.2);
+            border-bottom: 1px solid rgba(99, 102, 241, 0.2);
+        }
+
+        .policy-detail {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+        }
+
+        .policy-detail-label {
+            color: #94a3b8;
+        }
+
+        .policy-detail-value {
+            color: #e0e7ff;
+            font-weight: 600;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-active {
+            background: rgba(34, 197, 94, 0.2);
+            color: #86efac;
+        }
+
+        .status-inactive {
+            background: rgba(239, 68, 68, 0.2);
+            color: #fca5a5;
+        }
+
+        .status-pending {
+            background: rgba(251, 191, 36, 0.2);
+            color: #fcd34d;
+        }
+
+        .status-approved {
+            background: rgba(34, 197, 94, 0.2);
+            color: #86efac;
+        }
+
+        .btn {
+            padding: 12px 28px;
+            border: none;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+        }
+
+        .btn:hover {
+            box-shadow: 0 6px 25px rgba(99, 102, 241, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            color: #a5b4fc;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        }
+
+        .btn-small {
+            padding: 8px 18px;
+            font-size: 13px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #cbd5e1;
+        }
+
+        .form-input, .form-select, .form-textarea {
+            width: 100%;
+            padding: 14px 18px;
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            border-radius: 12px;
+            color: #e0e7ff;
+            font-size: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
+            outline: none;
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+        }
+
+        .form-textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .claim-card {
+            background: linear-gradient(135deg, rgba(251, 191, 36, 0.1) 0%, rgba(245, 158, 11, 0.1) 100%);
+            border: 1px solid rgba(251, 191, 36, 0.3);
+            border-radius: 16px;
+            padding: 25px;
+            margin-bottom: 20px;
+        }
+
+        .claim-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .claim-id {
+            font-size: 18px;
+            font-weight: 700;
+            color: #fcd34d;
+        }
+
+        .vote-buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 15px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(168, 85, 247, 0.15) 100%);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            border-radius: 16px;
+            padding: 25px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 36px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 8px;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #64748b;
+        }
+
+        .empty-state-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .checkbox {
+            width: 20px;
+            height: 20px;
+            accent-color: #6366f1;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            border-radius: 12px;
+            background: rgba(15, 23, 42, 0.9);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            transform: translateX(120%);
+            transition: transform 0.3s ease;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification.success {
+            border-color: rgba(34, 197, 94, 0.5);
+        }
+
+        .notification.error {
+            border-color: rgba(239, 68, 68, 0.5);
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .tabs {
+                overflow-x: auto;
+            }
+
+            .wallet-section {
+                flex-direction: column;
+                align-items: flex-end;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="background-gradient"></div>
+    
+    <div class="container">
+        <header>
+            <div class="logo">
+                <div class="logo-icon">🛡️</div>
+                InsureChain
+            </div>
+            <div class="wallet-section">
+                <div class="wallet-address" id="walletAddress">Connect Wallet</div>
+                <div class="role-badge" id="userRole">Guest</div>
+            </div>
+        </header>
+
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('marketplace')">Marketplace</button>
+            <button class="tab" onclick="switchTab('myPolicies')">My Policies</button>
+            <button class="tab" onclick="switchTab('claims')">Claims</button>
+            <button class="tab" onclick="switchTab('validator')">Validator</button>
+            <button class="tab" onclick="switchTab('admin')">Admin</button>
+        </div>
+
+        <!-- Marketplace Tab -->
+        <div id="marketplace" class="tab-content active">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="activePoliciesCount">0</div>
+                    <div class="stat-label">Active Policies</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="totalCoverageAmount">$0</div>
+                    <div class="stat-label">Total Coverage</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="policyTypesCount">0</div>
+                    <div class="stat-label">Policy Types</div>
+                </div>
+            </div>
+
+            <!-- Registration Section -->
+            <div class="card" id="registrationCard" style="display: none;">
+                <div class="card-header">
+                    <h2 class="card-title">Register as Policy Holder</h2>
+                </div>
+                <div class="card-body">
+                    <p>You need to register as a policy holder before you can purchase insurance policies.</p>
+                    <button class="btn" onclick="registerAsPolicyHolder()">Register as Policy Holder</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Available Insurance Policies</h2>
+                </div>
+                <div class="grid" id="policyTemplatesContainer">
+                    <!-- Policy templates will be loaded here -->
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📋</div>
+                        <h3>No Policies Available</h3>
+                        <p>Check back later or contact the admin to create new policy templates.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- My Policies Tab -->
+        <div id="myPolicies" class="tab-content">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">My Active Policies</h2>
+                </div>
+                <div class="grid" id="myPoliciesContainer">
+                    <!-- User policies will be loaded here -->
+                    <div class="empty-state">
+                        <div class="empty-state-icon">🛡️</div>
+                        <h3>No Policies Found</h3>
+                        <p>You haven't purchased any insurance policies yet.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Claims Tab -->
+        <div id="claims" class="tab-content">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">File New Claim</h2>
+                </div>
+                <form id="fileClaimForm">
+                    <div class="form-group">
+                        <label class="form-label">Select Policy</label>
+                        <select class="form-select" id="claimPolicySelect" required>
+                            <option value="">Select a policy</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Claim Reason</label>
+                        <textarea class="form-textarea" id="claimReason" placeholder="Describe your claim in detail..." required></textarea>
+                    </div>
+                    <button type="submit" class="btn" id="submitClaimBtn">Submit Claim</button>
+                </form>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">My Claims</h2>
+                </div>
+                <div id="myClaimsContainer">
+                    <!-- User claims will be loaded here -->
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📝</div>
+                        <h3>No Claims Filed</h3>
+                        <p>You haven't filed any claims yet.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Validator Tab -->
+        <div id="validator" class="tab-content">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Claims Pending Validation</h2>
+                </div>
+                <div id="pendingClaimsContainer">
+                    <!-- Pending claims will be loaded here -->
+                    <div class="empty-state">
+                        <div class="empty-state-icon">✅</div>
+                        <h3>No Pending Claims</h3>
+                        <p>There are no claims pending your validation.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Admin Tab -->
+        <div id="admin" class="tab-content">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="totalClaimsCount">0</div>
+                    <div class="stat-label">Total Claims</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="collectedPremiums">$0</div>
+                    <div class="stat-label">Collected Premiums</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="claimsPaidAmount">$0</div>
+                    <div class="stat-label">Claims Paid</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="activeValidatorsCount">0</div>
+                    <div class="stat-label">Active Validators</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Create New Policy Template</h2>
+                </div>
+                <form id="createPolicyForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Policy ID</label>
+                            <input type="number" class="form-input" id="policyId" placeholder="e.g., 1001" required />
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Coverage Type</label>
+                            <select class="form-select" id="coverageType" required>
+                                <option value="">Select type</option>
+                                <option value="Health Insurance">Health Insurance</option>
+                                <option value="Auto Insurance">Auto Insurance</option>
+                                <option value="Flight Insurance">Flight Insurance</option>
+                                <option value="Crop Insurance">Crop Insurance</option>
+                                <option value="Life Insurance">Life Insurance</option>
+                                <option value="Home Insurance">Home Insurance</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Coverage Amount (TST)</label>
+                            <input type="number" class="form-input" id="coverageAmount" placeholder="e.g., 50000" step="0.01" required />
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Monthly Premium (TST)</label>
+                            <input type="number" class="form-input" id="monthlyPremium" placeholder="e.g., 250" step="0.01" required />
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Start Date</label>
+                            <input type="date" class="form-input" id="startDate" required />
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">End Date</label>
+                            <input type="date" class="form-input" id="endDate" required />
+                        </div>
+                    </div>
+                    <div class="checkbox-group">
+                        <input type="checkbox" class="checkbox" id="isMonthly" checked />
+                        <label for="isMonthly" class="form-label" style="margin: 0;">Monthly Payment Plan</label>
+                    </div>
+                    <button type="submit" class="btn" id="createPolicyBtn">Create Policy Template</button>
+                </form>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Add Validator</h2>
+                </div>
+                <form id="addValidatorForm">
+                    <div class="form-group">
+                        <label class="form-label">Validator Wallet Address</label>
+                        <input type="text" class="form-input" id="validatorAddress" placeholder="0x..." required />
+                    </div>
+                    <button type="submit" class="btn" id="addValidatorBtn">Add Validator</button>
+                </form>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Withdraw Funds</h2>
+                </div>
+                <form id="withdrawFundsForm">
+                    <div class="form-group">
+                        <label class="form-label">Available Balance: <span id="availableBalance">0 TST</span></label>
+                        <input type="number" class="form-input" id="withdrawAmount" placeholder="Amount to withdraw" step="0.01" required />
+                    </div>
+                    <button type="submit" class="btn" id="withdrawBtn">Withdraw Tokens</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="notification" id="notification"></div>
+
+    <script>
+        // Contract addresses (update these with your deployed addresses)
+        const CONTRACT_ADDRESSES = {
+            TOKEN: "0x8464135c8F25Da09e49BC8782676a84730C318bC",
+            ENGINE: "0x71C95911E9a5D330f4D621842EC243EE1343292e"
+        };
+
+        // Contract ABIs
+        const TOKEN_ABI = [
+            "function balanceOf(address owner) view returns (uint256)",
+            "function approve(address spender, uint256 value) returns (bool)",
+            "function transfer(address to, uint256 value) returns (bool)",
+            "function transferFrom(address from, address to, uint256 value) returns (bool)"
+        ];
+
+        const ENGINE_ABI = [
+            {
+            "type": "constructor",
+            "inputs": [
+                {
+                    "name": "_tokenAddress",
+                    "type": "address",
+                    "internalType": "address"
+                }
+            ],
+            "stateMutability": "nonpayable"
+        },
+        {
+            "type": "function",
+            "name": "addPolicyHolder",
+            "inputs": [
+                {
+                    "name": "_policyHolder",
+                    "type": "address",
+                    "internalType": "address"
+                }
+            ],
+            "outputs": [],
+            "stateMutability": "nonpayable"
+        },
+        {
+            "type": "function",
+            "name": "addValidator",
+            "inputs": [
+                {
+                    "name": "_validator",
+                    "type": "address",
+                    "internalType": "address"
+                }
+            ],
+            "outputs": [],
+            "stateMutability": "nonpayable"
+        },
+        {
+            "type": "function",
+            "name": "admin",
+            "inputs": [],
+            "outputs": [
+                {
+                    "name": "",
+                    "type": "address",
+                    "internalType": "address"
+                }
+            ],
+            "stateMutability": "view"
+        },
+        {
+            "type": "function",
+            "name": "buyPolicy",
+            "inputs": [
+                {
+                    "name": "_templateId",
+                    "type": "uint256",
+                    "internalType": "uint256"
+                }
+            ],
+            "outputs": [
+                {
+                    "name": "",
+                    "type": "uint256",
+                    "internalType": "uint256"
+                }
+            ],
+            "stateMutability": "nonpayable"
+        },
+        {
+            "type": "function",
+            "name": "cancelPolicy",
+            "inputs": [
+                {
+                    "name": "_instanceId",
+                    "type": "uint256",
+                    "internalType": "uint256"
+                }
+            ],
+            "outputs": [],
+            "stateMutability": "nonpayable"
+        },
+        {
+            "type": "function",
+            "name": "claimIdToClaims",
+            "inputs": [
+                {
+                    "name": "",
+                    "type": "uint256",
+                    "internalType": "uint256"
+                }
+            ],
+            "outputs": [
+                {
+                    "name": "",
+                    "type": "string",
+                    "internalType": "string"
+                }
+            ],
+            "stateMutability": "view"
+        },
+        {
+            "type": "function",
+            "name": "claims",
+            "inputs": [
+                {
+                    "name": "",
+                    "type": "uint256",
+                    "internalType": "uint256"
+                }
+            ],
+            "outputs": [
+                {
+                    "name": "claimId",
+                    "type": "uint256",
+                    "internalType": "uint256"
+                },
+                {
+                    "name": "policyId",
+                    "type": "uint256",
+                    "internalType": "uint256"
+                },
+                {
+                    "name": "reason",
+                    "type": "string",
+                    "internalType": "string"
+                },
+                {
+                    "name": "isApproved",
+                    "type": "bool",
+                    "internalType": "bool"
+                },
+                {
+                    "name": "approvalCount",
+                    "type": "uint256",
+                    "internalType": "uint256"
+                },
+                {
+                    "name": "rejectionCount",
+                    "type": "uint256",
+                    "internalType": "uint256"
+                }
+            ],
+            "stateMutability": "view"
+        },
+        {
+            "type": "function",
+            "name": "createPolicyTemplate",
+            "inputs": [
+                {
+                    "name": "_policyId",
+                    "type": "uint256",
+                    "internalType": "uint256"
+                },
+                {
+                    "name": "_coverageAmount",
+                    "type": "uint256",
+                    "internalType": "uint256"
+                },
+                {
+                    "name": "_startDate",
+                    "type": "uint256",
+                    "internalType": "uint256"
+                },
+                {
+                    "name": "_endDate",
+                    "type": "uint256",
+                    "internalType": "uint256"
+                },
+                {
+                    "name": "_coverageType",
+                    "type": "string",
+                    "internalType": "string"
+                },
+                {
+                    "name": "_isMonthly",
+                    "type": "bool",
+                    "internalType": "bool"
+                },
+                {
+                    "name": "_monthlyPremium",
+                    "type": "uint256",
+                    "internalType": "uint256"
+                }
+            ],
+            "outputs": [],
+            "stateMutability": "nonpayable"
+        },
+        {
+            "type": "function",
+            "name": "fileClaim",
+            "inputs": [
+                {
+                    "name": "_policyId",
+                    "type": "uint256",
+                    "internalType": "uint256"
+                },
+                {
+                    "name": "_reason",
+                    "type": "string",
+                    "internalType": "string"
+                }
+            ],
+            "outputs": [
+                {
+                    "name": "",
+                    "type": "uint256",
+                    "internalType": "uint256"
+                }
+            ],
+            "stateMutability": "nonpayable"
+        },
+        {
+            "type": "function",
+            "name": "getAllPolicyTemplates",
+            "inputs": [],
+            "outputs": [
+                {
+                    "name": "",
+                    "type": "tuple[]",
+                    "internalType": "struct Engine.PolicyTemplate[]",
+                    "components": [
+                        {
+                            "name": "policyId",
+                            "type": "uint256",
+                            "internalType": "uint256"
+                        },
+                        {
+                            "name": "coverageAmount",
+                            "type": "uint256",
+                            "internalType": "uint256"
+                        },
+                        {
+                            "name": "startDate",
+                            "type": "uint256",
+                            "internalType": "uint256"
+                        },
+                        {
+                            "name": "endDate",
+                            "type": "uint256",
+                            "internalType": "uint256"
+                        },
+                        {
+                            "name": "coverageType",
+                            "type": "string",
+                            "internalType": "string"
+                        },
+                        {
+                            "name": "isMonthly",
+                            "type": "bool",
+                            "internalType": "bool"
+                        },
+                        {
+                            "name": "monthlyPremium",
+                            "type": "uint256",
+                            "internalType": "uint256"
+                        }
+                    ]
+                }
+            ],
+            "stateMutability": "view"
+        },
+        {
+            "type": "function",
+            "name": "getClaimDetails",
+            "inputs": [
+                {
+                    "name": "_claimId",
+                    "type": "uint256",
+                    "internalType": "uint256"
+                }
+            ],
+            "outputs": [
+                {
+                    "name": "policyId",
+                    "type": "uint256",
+                    "internalType": "uint256"
+                },
+                {
+                    "name": "reason",
+                    "type": "string",
+                    "internalType": "string"
+                },
+                {
+                    "name": "isApproved",
+                    "type": "bool",
+                    "internalType": "bool"
+                }
+            ],
+            "stateMutability": "view"
+        },
+        {
+            "type": "function",
+            "name": "getClaimStatus",
+            "inputs": [
+                {
+                    "name": "_claimId",
+                    "type": "uint256",
+                    "internalType": "uint256"
+                }
+            ],
+            "outputs": [
+                {
+                    "name": "isApproved",
+                    "type": "bool",
+                    "internalType": "bool"
+                },
+                {
+                    "name": "approvalCount",
+                    "type": "uint256",
+                    "internalType": "uint256"
+                },
+                {
+                    "name": "rejectionCount",
+                    "type": "uint256",
+                    "internalType": "uint256"
+                }
+            ],
+            "stateMutability": "view"
+        },
+        {
+            "type": "function",
+            "name": "getPaymentInfo",
+            "inputs": [
+                {
+                    "name": "_instanceId",
+                    "type": "uint256",
+                    "internalType": "uint256"
+                }
+            ],
+            "outputs": [
+                {
+                    "name": "paymentsMade",
+                    "type": "uint256",
+                    "internalType": "uint256"
+                },
+                {
+                    "name": "nextPaymentDate",
+                    "type": "uint256",
+                    "internalType": "uint256"
+                },
+                {
+                    "name": "monthlyPremium",
+                    "type": "uint256",
+                    "internalType": "uint256"
+                }
+            ],
+            "stateMutability": "view"
+        },
+        {
+            "type": "function",
+            "name": "makeMonthlyPayment",
+            "inputs": [
+                {
+                    "name": "_instanceId",
+                    "type": "uint256",
+                    "internalType": "uint256"
+                }
+            ],
+            "outputs": [],
+            "stateMutability": "nonpayable"
+        },
+        {
+            "type": "function",
+            "name": "nextClaimId",
+            "inputs": [],
+            "outputs": [
+                {
+                    "name": "",
+                    "type": "uint256",
+                    "internalType": "uint256"
+                }
+            ],
+            "stateMutability": "view"
+        },
+        {
+            "type": "function",
+            "name": "nextInstanceId",
+            "inputs": [],
+            "outputs": [
+                {
+                    "name": "",
+                    "type": "uint256",
+                    "internalType": "uint256"
+                }
+            ],
+            "stateMutability": "view"
+        },
+        {
+            "type": "function",
+            "name": "policyHolders",
+            "inputs": [
+                {
+                    "name": "",
+                    "type": "uint256",
+                    "internalType": "uint256"
+                }
+            ],
+            "outputs": [
+                {
+                    "name": "",
+                    "type": "address",
+                    "internalType": "address"
+                }
+            ],
+            "stateMutability": "view"
+        },
+        {
+            "type": "function",
+            "name": "policyInstanceList",
+            "inputs": [
+                {
+                    "name": "",
+                    "type": "uint256",
+                    "internalType": "uint256"
+                }
+            ],
+            "outputs": [
+                {
+                    "name": "templateId",
+                    "type": "uint256",
+                    "internalType": "uint256"
+                },
+                {
+                    "name": "policyHolder",
+                    "type": "address",
+                    "internalType": "address"
+                },
+                {
+                    "name": "startDate",
+                    "type": "uint256",
+                    "internalType": "uint256"
+                },
+                {
+                    "name": "endDate",
+                    "type": "uint256",
+                    "internalType": "uint256"
+                },
+                {
+                    "name": "isActive",
+                    "type": "bool",
+                    "internalType": "bool"
+                },
+                {
+                    "name": "isClaimed",
+                    "type": "bool",
+                    "internalType": "bool"
+                },
+                {
+                    "name": "nextPaymentDate",
+                    "type": "uint256",
+                    "internalType": "uint256"
+                },
+                {
+                    "name": "paymentsMade",
+                    "type": "uint256",
+                    "internalType": "uint256"
+                }
+            ],
+            "stateMutability": "view"
+        },
+        {
+            "type": "function",
+            "name": "policyInstances",
+            "inputs": [
+                {
+                    "name": "",
+                    "type": "uint256",
+                    "internalType": "uint256"
+                }
+            ],
+            "outputs": [
+                {
+                    "name": "templateId",
+                    "type": "uint256",
+                    "internalType": "uint256"
+                },
+                {
+                    "name": "policyHolder",
+                    "type": "address",
+                    "internalType": "address"
+                },
+                {
+                    "name": "startDate",
+                    "type": "uint256",
+                    "internalType": "uint256"
+                },
+                {
+                    "name": "endDate",
+                    "type": "uint256",
+                    "internalType": "uint256"
+                },
+                {
+                    "name": "isActive",
+                    "type": "bool",
+                    "internalType": "bool"
+                },
+                {
+                    "name": "isClaimed",
+                    "type": "bool",
+                    "internalType": "bool"
+                },
+                {
+                    "name": "nextPaymentDate",
+                    "type": "uint256",
+                    "internalType": "uint256"
+                },
+                {
+                    "name": "paymentsMade",
+                    "type": "uint256",
+                    "internalType": "uint256"
+                }
+            ],
+            "stateMutability": "view"
+        },
+        {
+            "type": "function",
+            "name": "policyTemplateList",
+            "inputs": [
+                {
+                    "name": "",
+                    "type": "uint256",
+                    "internalType": "uint256"
+                }
+            ],
+            "outputs": [
+                {
+                    "name": "policyId",
+                    "type": "uint256",
+                    "internalType": "uint256"
+                },
+                {
+                    "name": "coverageAmount",
+                    "type": "uint256",
+                    "internalType": "uint256"
+                },
+                {
+                    "name": "startDate",
+                    "type": "uint256",
+                    "internalType": "uint256"
+                },
+                {
+                    "name": "endDate",
+                    "type": "uint256",
+                    "internalType": "uint256"
+                },
+                {
+                    "name": "coverageType",
+                    "type": "string",
+                    "internalType": "string"
+                },
+                {
+                    "name": "isMonthly",
+                    "type": "bool",
+                    "internalType": "bool"
+                },
+                {
+                    "name": "monthlyPremium",
+                    "type": "uint256",
+                    "internalType": "uint256"
+                }
+            ],
+            "stateMutability": "view"
+        },
+        {
+            "type": "function",
+            "name": "policyTemplates",
+            "inputs": [
+                {
+                    "name": "",
+                    "type": "uint256",
+                    "internalType": "uint256"
+                }
+            ],
+            "outputs": [
+                {
+                    "name": "policyId",
+                    "type": "uint256",
+                    "internalType": "uint256"
+                },
+                {
+                    "name": "coverageAmount",
+                    "type": "uint256",
+                    "internalType": "uint256"
+                },
+                {
+                    "name": "startDate",
+                    "type": "uint256",
+                    "internalType": "uint256"
+                },
+                {
+                    "name": "endDate",
+                    "type": "uint256",
+                    "internalType": "uint256"
+                },
+                {
+                    "name": "coverageType",
+                    "type": "string",
+                    "internalType": "string"
+                },
+                {
+                    "name": "isMonthly",
+                    "type": "bool",
+                    "internalType": "bool"
+                },
+                {
+                    "name": "monthlyPremium",
+                    "type": "uint256",
+                    "internalType": "uint256"
+                }
+            ],
+            "stateMutability": "view"
+        },
+        {
+            "type": "function",
+            "name": "token",
+            "inputs": [],
+            "outputs": [
+                {
+                    "name": "",
+                    "type": "address",
+                    "internalType": "contract IERC20"
+                }
+            ],
+            "stateMutability": "view"
+        },
+        {
+            "type": "function",
+            "name": "validateClaim",
+            "inputs": [
+                {
+                    "name": "_claimId",
+                    "type": "uint256",
+                    "internalType": "uint256"
+                },
+                {
+                    "name": "_approval",
+                    "type": "bool",
+                    "internalType": "bool"
+                }
+            ],
+            "outputs": [],
+            "stateMutability": "nonpayable"
+        },
+        {
+            "type": "function",
+            "name": "validators",
+            "inputs": [
+                {
+                    "name": "",
+                    "type": "uint256",
+                    "internalType": "uint256"
+                }
+            ],
+            "outputs": [
+                {
+                    "name": "",
+                    "type": "address",
+                    "internalType": "address"
+                }
+            ],
+            "stateMutability": "view"
+        },
+        {
+            "type": "function",
+            "name": "withdrawTokens",
+            "inputs": [
+                {
+                    "name": "_amount",
+                    "type": "uint256",
+                    "internalType": "uint256"
+                }
+            ],
+            "outputs": [],
+            "stateMutability": "nonpayable"
+        }
+    
+        ]      // Global variables
+        let provider;
+        let signer;
+        let tokenContract;
+        let engineContract;
+        let userAddress;
+        let userRole = "Guest";
+
+        // Initialize when page loads
+        window.addEventListener('load', async function() {
+            // Set default dates for admin form
+            const today = new Date();
+            const oneYearFromNow = new Date();
+            oneYearFromNow.setFullYear(today.getFullYear() + 1);
+            
+            document.getElementById('startDate').valueAsDate = today;
+            document.getElementById('endDate').valueAsDate = oneYearFromNow;
+            
+            // Check if MetaMask is installed
+            if (typeof window.ethereum !== 'undefined') {
+                console.log('MetaMask is installed!');
+            } else {
+                showNotification('Please install MetaMask to use this dApp', 'error');
+            }
+            
+            // Set up form event listeners
+            setupEventListeners();
+        });
+
+        // Set up event listeners for forms
+        function setupEventListeners() {
+            // Connect wallet button
+            document.getElementById('walletAddress').addEventListener('click', connectWallet);
+            
+            // File claim form
+            document.getElementById('fileClaimForm').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                await fileClaim();
+            });
+            
+            // Create policy form
+            document.getElementById('createPolicyForm').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                await createPolicyTemplate();
+            });
+            
+            // Add validator form
+            document.getElementById('addValidatorForm').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                await addValidator();
+            });
+            
+            // Withdraw funds form
+            document.getElementById('withdrawFundsForm').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                await withdrawFunds();
+            });
+        }
+
+        // Connect to wallet
+        async function connectWallet() {
+            if (typeof window.ethereum === 'undefined') {
+                showNotification('Please install MetaMask to use this dApp', 'error');
+                return;
+            }
+
+            try {
+                // Check current network
+                const chainId = await ethereum.request({ method: 'eth_chainId' });
+                const currentChainId = parseInt(chainId, 16);
+                console.log('Current chain ID:', chainId, '(Decimal:', currentChainId, ')');
+                
+                // Check if we're on the correct network (31337 = local Anvil)
+                if (currentChainId !== 31337) {
+                    showNotification('Please switch to Local Anvil network (Chain ID: 31337) in MetaMask', 'warning');
+                    await switchToLocalNetwork();
+                    return;
+                }
+                
+                // Request account access
+                const accounts = await ethereum.request({ method: 'eth_requestAccounts' });
+                userAddress = accounts[0];
+                
+                // Update UI with wallet address
+                document.getElementById('walletAddress').textContent = 
+                    userAddress.substring(0, 6) + '...' + userAddress.substring(38);
+                
+                // Initialize contracts
+                await initializeContracts();
+                
+                // Determine user role
+                await determineUserRole();
+                
+                // Load data for all tabs
+                await loadAllData();
+                
+                showNotification('Wallet connected successfully!', 'success');
+            } catch (error) {
+                console.error('Error connecting wallet:', error);
+                showNotification('Failed to connect wallet: ' + error.message, 'error');
+            }
+        }
+
+        // Switch to local network
+        async function switchToLocalNetwork() {
+            try {
+                await ethereum.request({
+                    method: 'wallet_switchEthereumChain',
+                    params: [{ chainId: '0x7a69' }], // 31337 in hex
+                });
+            } catch (switchError) {
+                // This error code indicates that the chain has not been added to MetaMask
+                if (switchError.code === 4902) {
+                    try {
+                        await ethereum.request({
+                            method: 'wallet_addEthereumChain',
+                            params: [{
+                                chainId: '0x7a69', // 31337
+                                chainName: 'Local Anvil',
+                                rpcUrls: ['http://127.0.0.1:8545'],
+                                nativeCurrency: {
+                                    name: 'Ethereum',
+                                    symbol: 'ETH',
+                                    decimals: 18
+                                },
+                                blockExplorerUrls: null
+                            }],
+                        });
+                    } catch (addError) {
+                        console.error('Failed to add local network:', addError);
+                        showNotification('Failed to add Local Anvil network. Please add it manually in MetaMask.', 'error');
+                    }
+                } else {
+                    console.error('Failed to switch network:', switchError);
+                    showNotification('Failed to switch to Local Anvil network. Please switch manually in MetaMask.', 'error');
+                }
+            }
+        }
+
+        // Initialize contracts with improved error handling
+        async function initializeContracts() {
+            try {
+                // Create provider and signer
+                provider = new ethers.providers.Web3Provider(window.ethereum);
+                signer = provider.getSigner();
+                
+                // Create contract instances
+                tokenContract = new ethers.Contract(CONTRACT_ADDRESSES.TOKEN, TOKEN_ABI, signer);
+                engineContract = new ethers.Contract(CONTRACT_ADDRESSES.ENGINE, ENGINE_ABI, signer);
+                
+                console.log("Contract instances created");
+                console.log("Engine contract address:", CONTRACT_ADDRESSES.ENGINE);
+                console.log("Token contract address:", CONTRACT_ADDRESSES.TOKEN);
+                
+                // Test contract connection
+                try {
+                    const admin = await engineContract.admin();
+                    console.log("Contract connection successful. Admin:", admin);
+                } catch (error) {
+                    console.error("Contract connection test failed:", error);
+                    throw new Error("Cannot connect to contract. Please check network and contract addresses.");
+                }
+            } catch (error) {
+                console.error("Contract initialization failed:", error);
+                showNotification('Failed to initialize contracts. Please check contract addresses and network.', 'error');
+                throw error;
+            }
+        }
+
+        // Determine user role with corrected approach
+        async function determineUserRole() {
+            try {
+                // Check if engineContract is properly initialized
+                if (!engineContract) {
+                    throw new Error("Engine contract not initialized");
+                }
+                
+                const adminAddress = await engineContract.admin();
+                
+                if (userAddress.toLowerCase() === adminAddress.toLowerCase()) {
+                    userRole = "Admin";
+                } else {
+                    // Check if user is a validator
+                    let isValidator = false;
+                    try {
+                        // Get the number of validators first
+                        // We need to count validators by trying to access them until we get an error
+                        let i = 0;
+                        while (true) {
+                            try {
+                                const validator = await engineContract.validators(i);
+                                if (validator.toLowerCase() === userAddress.toLowerCase()) {
+                                    isValidator = true;
+                                    break;
+                                }
+                                i++;
+                            } catch (err) {
+                                // Reached end of validators array or error occurred
+                                break;
+                            }
+                        }
+                    } catch (error) {
+                        console.error('Error checking validator status:', error);
+                    }
+                    
+                    // Check if user is a registered policy holder
+                    const isRegisteredPolicyHolder = await isPolicyHolder(userAddress);
+                    
+                    if (isValidator) {
+                        userRole = "Validator";
+                    } else if (isRegisteredPolicyHolder) {
+                        userRole = "Policy Holder";
+                    } else {
+                        userRole = "Guest";
+                    }
+                }
+                
+                document.getElementById('userRole').textContent = userRole;
+            } catch (error) {
+                console.error('Error determining user role:', error);
+                userRole = "Policy Holder"; // Default fallback
+                document.getElementById('userRole').textContent = userRole;
+            }
+        }
+
+        // Load all data for all tabs
+        async function loadAllData() {
+            showNotification('Loading data from blockchain...', 'info');
+            await loadPolicyTemplates();
+            await loadUserPolicies();
+            await loadUserClaims();
+            await loadPendingClaims();
+            await loadStats();
+            showNotification('Data loaded successfully!', 'success');
+        }
+
+        // Load policy templates for marketplace
+        async function loadPolicyTemplates() {
+            try {
+                const container = document.getElementById('policyTemplatesContainer');
+                const registrationCard = document.getElementById('registrationCard');
+                
+                // Clear existing content
+                container.innerHTML = '';
+                
+                // Check if user is a registered policy holder (if wallet is connected)
+                if (userAddress) {
+                    const isRegistered = await isPolicyHolder(userAddress);
+                    if (!isRegistered && userRole === "Guest") {
+                        registrationCard.style.display = 'block';
+                    } else {
+                        registrationCard.style.display = 'none';
+                    }
+                } else {
+                    registrationCard.style.display = 'none';
+                }
+                
+                // Get all policy templates from contract using the new function
+                let templates;
+                try {
+                    templates = await engineContract.getAllPolicyTemplates();
+                } catch (error) {
+                    console.error('Error getting policy templates:', error);
+                    showNotification('Failed to load policy templates: Contract not accessible', 'error');
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">📋</div>
+                            <h3>Error Loading Policies</h3>
+                            <p>Failed to connect to the contract. Please check your connection.</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                if (templates.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">📋</div>
+                            <h3>No Policies Available</h3>
+                            <p>Check back later or contact the admin to create new policy templates.</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                // Display each policy template
+                templates.forEach(template => {
+                    try {
+                        // Only show active templates
+                        const now = Math.floor(Date.now() / 1000);
+                        if (template.startDate <= now && template.endDate >= now) {
+                            const policyCard = document.createElement('div');
+                            policyCard.className = 'policy-card';
+                            
+                            // Format dates
+                            const startDate = new Date(template.startDate * 1000).toLocaleDateString();
+                            const endDate = new Date(template.endDate * 1000).toLocaleDateString();
+                            
+                            policyCard.innerHTML = `
+                                <div class="policy-type">${template.coverageType}</div>
+                                <div class="policy-amount">${parseFloat(ethers.utils.formatEther(template.coverageAmount)).toLocaleString()} TST</div>
+                                <div class="policy-details">
+                                    <div class="policy-detail">
+                                        <span class="policy-detail-label">Monthly Premium</span>
+                                        <span class="policy-detail-value">${parseFloat(ethers.utils.formatEther(template.monthlyPremium)).toLocaleString()} TST</span>
+                                    </div>
+                                    <div class="policy-detail">
+                                        <span class="policy-detail-label">Duration</span>
+                                        <span class="policy-detail-value">${startDate} to ${endDate}</span>
+                                    </div>
+                                    <div class="policy-detail">
+                                        <span class="policy-detail-label">Payment Plan</span>
+                                        <span class="policy-detail-value">${template.isMonthly ? 'Monthly' : 'One-time'}</span>
+                                    </div>
+                                </div>
+                                <button class="btn btn-small" style="width: 100%;" onclick="buyPolicy(${template.policyId})">Purchase Policy</button>
+                            `;
+                            container.appendChild(policyCard);
+                        }
+                    } catch (error) {
+                        console.error('Error displaying policy template:', error);
+                        // Continue with other templates even if one fails
+                    }
+                });
+                
+                // Check if no active templates were found
+                if (container.innerHTML === '') {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">📋</div>
+                            <h3>No Active Policies</h3>
+                            <p>No policy templates are currently active.</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error loading policy templates:', error);
+                showNotification('Failed to load policy templates: ' + error.message, 'error');
+            }
+        }
+
+        // Load user policies with improved error handling
+        async function loadUserPolicies() {
+            try {
+                const container = document.getElementById('myPoliciesContainer');
+                const claimSelect = document.getElementById('claimPolicySelect');
+                
+                // Clear existing content
+                container.innerHTML = '';
+                claimSelect.innerHTML = '<option value="">Select a policy</option>';
+                
+                // Get the next instance ID to determine how many policies exist
+                let nextInstanceId;
+                try {
+                    nextInstanceId = await engineContract.nextInstanceId();
+                } catch (error) {
+                    console.error('Error getting nextInstanceId:', error);
+                    showNotification('Failed to load policies: Contract not accessible', 'error');
+                    return;
+                }
+                
+                const policies = [];
+                
+                // Iterate through possible policy IDs
+                for (let i = 1; i < nextInstanceId; i++) {
+                    try {
+                        const instance = await engineContract.policyInstances(i);
+                        if (instance.policyHolder && instance.policyHolder.toLowerCase() === userAddress.toLowerCase()) {
+                            // Ensure templateId is valid before calling policyTemplates
+                            if (instance.templateId === undefined || instance.templateId === null || instance.templateId === 0) {
+                                continue;
+                            }
+                            
+                            const template = await engineContract.policyTemplates(instance.templateId);
+                            const policyData = {
+                                id: i,
+                                templateId: instance.templateId,
+                                type: template.coverageType,
+                                amount: parseFloat(ethers.utils.formatEther(template.coverageAmount)).toLocaleString(),
+                                startDate: new Date(instance.startDate * 1000).toLocaleDateString(),
+                                endDate: new Date(instance.endDate * 1000).toLocaleDateString(),
+                                nextPayment: instance.nextPaymentDate > 0 ? new Date(instance.nextPaymentDate * 1000).toLocaleDateString() : 'N/A',
+                                paymentsMade: instance.paymentsMade.toString(),
+                                isActive: instance.isActive,
+                                isMonthly: template.isMonthly,
+                                isClaimed: instance.isClaimed
+                            };
+                            
+                            policies.push(policyData);
+                            
+                            // Add active, unclaimed policies to the claim dropdown
+                            if (instance.isActive && !instance.isClaimed) {
+                                const option = document.createElement('option');
+                                option.value = i;
+                                option.textContent = `#${i} - ${template.coverageType} (${policyData.amount} TST)`;
+                                claimSelect.appendChild(option);
+                            }
+                        }
+                    } catch (err) {
+                        // Policy doesn't exist or other error, continue
+                        console.error(`Error loading policy instance ${i}:`, err);
+                        continue;
+                    }
+                }
+                
+                if (policies.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">🛡️</div>
+                            <h3>No Policies Found</h3>
+                            <p>You haven't purchased any insurance policies yet.</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                policies.forEach(policy => {
+                    const policyCard = document.createElement('div');
+                    policyCard.className = 'policy-card';
+                    policyCard.innerHTML = `
+                        <div class="policy-type">${policy.type}</div>
+                        <div class="policy-amount">${policy.amount} TST</div>
+                        <div class="policy-details">
+                            <div class="policy-detail">
+                                <span class="policy-detail-label">Policy ID</span>
+                                <span class="policy-detail-value">#${policy.id}</span>
+                            </div>
+                            <div class="policy-detail">
+                                <span class="policy-detail-label">Period</span>
+                                <span class="policy-detail-value">${policy.startDate} to ${policy.endDate}</span>
+                            </div>
+                            ${policy.isMonthly ? `
+                            <div class="policy-detail">
+                                <span class="policy-detail-label">Next Payment</span>
+                                <span class="policy-detail-value">${policy.nextPayment}</span>
+                            </div>
+                            <div class="policy-detail">
+                                <span class="policy-detail-label">Payments Made</span>
+                                <span class="policy-detail-value">${policy.paymentsMade}</span>
+                            </div>
+                            ` : ''}
+                            <div class="policy-detail">
+                                <span class="policy-detail-label">Status</span>
+                                <span class="status-badge ${policy.isActive ? 'status-active' : 'status-inactive'}">${policy.isActive ? 'Active' : 'Inactive'}</span>
+                            </div>
+                            ${policy.isClaimed ? `
+                            <div class="policy-detail">
+                                <span class="policy-detail-label">Claim Status</span>
+                                <span class="status-badge status-approved">Claim Filed</span>
+                            </div>
+                            ` : ''}
+                        </div>
+                        ${policy.isActive && !policy.isClaimed && policy.isMonthly ? `
+                        <div style="display: flex; gap: 10px; margin-top: 15px;">
+                            <button class="btn btn-small" style="flex: 1;" onclick="makePayment(${policy.id})">Make Payment</button>
+                            <button class="btn btn-secondary btn-small" style="flex: 1;" onclick="fileClaimForPolicy(${policy.id})">File Claim</button>
+                        </div>
+                        ` : policy.isActive && !policy.isClaimed ? `
+                        <div style="display: flex; gap: 10px; margin-top: 15px;">
+                            <button class="btn btn-secondary btn-small" style="width: 100%;" onclick="fileClaimForPolicy(${policy.id})">File Claim</button>
+                        </div>
+                        ` : policy.isClaimed ? `
+                        <div style="margin-top: 15px; padding: 10px; background: rgba(251, 191, 36, 0.1); border-radius: 8px; text-align: center;">
+                            <span style="color: #fcd34d; font-weight: 600;">⚠️ Claim Already Filed</span>
+                        </div>
+                        ` : ''}
+                        ${policy.isActive ? `
+                        <button class="btn btn-danger btn-small" style="width: 100%; margin-top: 10px;" onclick="cancelPolicy(${policy.id})">Cancel Policy</button>
+                        ` : ''}
+                    `;
+                    container.appendChild(policyCard);
+                });
+            } catch (error) {
+                console.error('Error loading user policies:', error);
+                showNotification('Failed to load user policies: ' + error.message, 'error');
+            }
+        }
+
+        // Load user claims
+        async function loadUserClaims() {
+            try {
+                const container = document.getElementById('myClaimsContainer');
+                
+                // Clear existing content
+                container.innerHTML = '';
+                
+                // Get the next claim ID to determine how many claims exist
+                let nextClaimId;
+                try {
+                    nextClaimId = await engineContract.nextClaimId();
+                } catch (error) {
+                    console.error('Error getting nextClaimId:', error);
+                    showNotification('Failed to load claims: Contract not accessible', 'error');
+                    return;
+                }
+                
+                const claims = [];
+                
+                // Iterate through possible claim IDs
+                for (let i = 1; i < nextClaimId; i++) {
+                    try {
+                        const claim = await engineContract.claims(i);
+                        // Get policy instance to check if it belongs to user
+                        const policyInstance = await engineContract.policyInstances(claim.policyId);
+                        if (policyInstance.policyHolder && policyInstance.policyHolder.toLowerCase() === userAddress.toLowerCase()) {
+                            // Ensure templateId is valid before calling policyTemplates
+                            if (policyInstance.templateId === undefined || policyInstance.templateId === null || policyInstance.templateId === 0) {
+                                continue;
+                            }
+                            
+                            const policyTemplate = await engineContract.policyTemplates(policyInstance.templateId);
+                            
+                            claims.push({
+                                id: claim.claimId.toString(),
+                                policyId: claim.policyId.toString(),
+                                policyType: policyTemplate.coverageType,
+                                submitted: "N/A", // Would need events to get exact submission date
+                                approvals: claim.approvalCount.toString(),
+                                rejections: claim.rejectionCount.toString(),
+                                reason: claim.reason,
+                                status: claim.isApproved ? "Approved" : (parseInt(claim.approvalCount) > 0 || parseInt(claim.rejectionCount) > 0 ? "Pending" : "New"),
+                                isApproved: claim.isApproved
+                            });
+                        }
+                    } catch (err) {
+                        // Claim doesn't exist or other error, continue
+                        console.error(`Error loading claim ${i}:`, err);
+                        continue;
+                    }
+                }
+                
+                if (claims.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">📝</div>
+                            <h3>No Claims Filed</h3>
+                            <p>You haven't filed any claims yet.</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                claims.forEach(claim => {
+                    const claimCard = document.createElement('div');
+                    claimCard.className = 'claim-card';
+                    claimCard.innerHTML = `
+                        <div class="claim-header">
+                            <div>
+                                <div class="claim-id">Claim #${claim.id}</div>
+                                <div style="color: #94a3b8; font-size: 14px; margin-top: 5px;">Policy: ${claim.policyType} #${claim.policyId}</div>
+                            </div>
+                            <span class="status-badge status-${claim.status.toLowerCase()}">${claim.status}</span>
+                        </div>
+                        <div class="policy-details">
+                            <div class="policy-detail">
+                                <span class="policy-detail-label">Submitted</span>
+                                <span class="policy-detail-value">${claim.submitted}</span>
+                            </div>
+                            <div class="policy-detail">
+                                <span class="policy-detail-label">Approvals</span>
+                                <span class="policy-detail-value">${claim.approvals}</span>
+                            </div>
+                            <div class="policy-detail">
+                                <span class="policy-detail-label">Rejections</span>
+                                <span class="policy-detail-value">${claim.rejections}</span>
+                            </div>
+                        </div>
+                        <p style="color: #cbd5e1; margin-top: 15px; font-size: 14px;">
+                            <strong>Reason:</strong> ${claim.reason}
+                        </p>
+                        ${claim.isApproved ? `
+                        <div style="margin-top: 15px; padding: 10px; background: rgba(34, 197, 94, 0.1); border-radius: 8px; text-align: center;">
+                            <span style="color: #86efac; font-weight: 600;">✅ Claim Approved - Coverage Paid Out</span>
+                        </div>
+                        ` : ''}
+                    `;
+                    container.appendChild(claimCard);
+                });
+            } catch (error) {
+                console.error('Error loading user claims:', error);
+                showNotification('Failed to load user claims: ' + error.message, 'error');
+            }
+        }
+
+        // Load pending claims for validators with improved error handling
+        async function loadPendingClaims() {
+            try {
+                const container = document.getElementById('pendingClaimsContainer');
+                
+                // Clear existing content
+                container.innerHTML = '';
+                
+                // Check if user is a validator
+                let validatorCount = 0;
+                let isValidator = false;
+                
+                try {
+                    // Count validators by trying to access them until we get an error
+                    while (true) {
+                        try {
+                            const validator = await engineContract.validators(validatorCount);
+                            if (validator.toLowerCase() === userAddress.toLowerCase()) {
+                                isValidator = true;
+                            }
+                            validatorCount++;
+                        } catch (err) {
+                            // Reached end of validators array
+                            break;
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error checking validator status:', error);
+                }
+                
+                if (!isValidator) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">✅</div>
+                            <h3>Access Denied</h3>
+                            <p>You are not authorized to view pending claims.</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                // Get pending claims from contract
+                let nextClaimId;
+                try {
+                    nextClaimId = await engineContract.nextClaimId();
+                } catch (error) {
+                    console.error('Error getting nextClaimId:', error);
+                    showNotification('Failed to load claims: Contract not accessible', 'error');
+                    return;
+                }
+                
+                const claims = [];
+                
+                // Iterate through possible claim IDs
+                for (let i = 1; i < nextClaimId; i++) {
+                    try {
+                        const claim = await engineContract.claims(i);
+                        // Check if claim is not yet approved and has been filed
+                        if (!claim.isApproved && (parseInt(claim.approvalCount) > 0 || parseInt(claim.rejectionCount) > 0 || true)) {
+                            const policyInstance = await engineContract.policyInstances(claim.policyId);
+                            // Ensure templateId is valid before calling policyTemplates
+                            if (policyInstance.templateId === undefined || policyInstance.templateId === null || policyInstance.templateId === 0) {
+                                continue;
+                            }
+                            
+                            const policyTemplate = await engineContract.policyTemplates(policyInstance.templateId);
+                            
+                            // Check if current validator has voted
+                            // Since we can't directly access the mapping, we'll assume they haven't voted
+                            const hasVoted = false;
+                            
+                            claims.push({
+                                id: claim.claimId.toString(),
+                                policyId: claim.policyId.toString(),
+                                policyType: policyTemplate.coverageType,
+                                amount: parseFloat(ethers.utils.formatEther(policyTemplate.coverageAmount)).toLocaleString(),
+                                votes: `${claim.approvalCount.toString()} Approve / ${claim.rejectionCount.toString()} Reject`,
+                                required: `${Math.floor(validatorCount / 2) + 1} Approvals`,
+                                reason: claim.reason,
+                                hasVoted: hasVoted
+                            });
+                        }
+                    } catch (err) {
+                        // Claim doesn't exist or other error, continue
+                        console.error(`Error loading pending claim ${i}:`, err);
+                        continue;
+                    }
+                }
+                
+                if (claims.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">✅</div>
+                            <h3>No Pending Claims</h3>
+                            <p>There are no claims pending your validation.</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                claims.forEach(claim => {
+                    const claimCard = document.createElement('div');
+                    claimCard.className = 'claim-card';
+                    claimCard.style.background = 'linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(168, 85, 247, 0.1) 100%)';
+                    claimCard.style.borderColor = 'rgba(99, 102, 241, 0.3)';
+                    claimCard.innerHTML = `
+                        <div class="claim-header">
+                            <div>
+                                <div class="claim-id" style="color: #a5b4fc;">Claim #${claim.id}</div>
+                                <div style="color: #94a3b8; font-size: 14px; margin-top: 5px;">Policy: ${claim.policyType} #${claim.policyId}</div>
+                            </div>
+                            <span class="status-badge status-pending">Awaiting Vote</span>
+                        </div>
+                        <div class="policy-details">
+                            <div class="policy-detail">
+                                <span class="policy-detail-label">Coverage Amount</span>
+                                <span class="policy-detail-value">${claim.amount} TST</span>
+                            </div>
+                            <div class="policy-detail">
+                                <span class="policy-detail-label">Current Votes</span>
+                                <span class="policy-detail-value">${claim.votes}</span>
+                            </div>
+                            <div class="policy-detail">
+                                <span class="policy-detail-label">Required</span>
+                                <span class="policy-detail-value">${claim.required}</span>
+                            </div>
+                        </div>
+                        <p style="color: #cbd5e1; margin-top: 15px; font-size: 14px;">
+                            <strong>Reason:</strong> ${claim.reason}
+                        </p>
+                        <div class="vote-buttons">
+                            <button class="btn btn-small" style="flex: 1; background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);" onclick="validateClaim(${claim.id}, true)" ${claim.hasVoted ? 'disabled' : ''}>✓ Approve</button>
+                            <button class="btn btn-danger btn-small" style="flex: 1;" onclick="validateClaim(${claim.id}, false)" ${claim.hasVoted ? 'disabled' : ''}>✗ Reject</button>
+                        </div>
+                        ${claim.hasVoted ? '<p style="color: #94a3b8; font-size: 14px; margin-top: 10px; text-align: center;">You have already voted on this claim</p>' : ''}
+                    `;
+                    container.appendChild(claimCard);
+                });
+            } catch (error) {
+                console.error('Error loading pending claims:', error);
+                showNotification('Failed to load pending claims: ' + error.message, 'error');
+            }
+        }
+
+        // Load statistics with improved error handling
+        async function loadStats() {
+            try {
+                // Verify contract is connected
+                if (!engineContract) {
+                    throw new Error('Contract not initialized');
+                }
+                
+                // Get real stats from contract with error handling
+                let nextInstanceId, nextClaimId, validatorCount;
+                
+                try {
+                    nextInstanceId = await engineContract.nextInstanceId();
+                } catch (error) {
+                    console.error('Error getting nextInstanceId:', error);
+                    nextInstanceId = 1; // Default fallback
+                }
+                
+                try {
+                    nextClaimId = await engineContract.nextClaimId();
+                } catch (error) {
+                    console.error('Error getting nextClaimId:', error);
+                    nextClaimId = 1; // Default fallback
+                }
+                
+                try {
+                    // Count validators by trying to access them until we get an error
+                    validatorCount = 0;
+                    while (true) {
+                        try {
+                            await engineContract.validators(validatorCount);
+                            validatorCount++;
+                        } catch (err) {
+                            // Reached end of validators array
+                            break;
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error getting validator count:', error);
+                    validatorCount = 0; // Default fallback
+                }
+                
+                // Calculate active policies
+                let activePolicies = 0;
+                let totalCoverage = 0;
+                
+                for (let i = 1; i < nextInstanceId; i++) {
+                    try {
+                        const instance = await engineContract.policyInstances(i);
+                        if (instance.isActive) {
+                            // Ensure templateId is valid before calling policyTemplates
+                            if (instance.templateId === undefined || instance.templateId === null || instance.templateId === 0) {
+                                continue;
+                            }
+                            
+                            const template = await engineContract.policyTemplates(instance.templateId);
+                            totalCoverage += parseFloat(ethers.utils.formatEther(template.coverageAmount));
+                            activePolicies++;
+                        }
+                    } catch (err) {
+                        // Policy doesn't exist or other error, continue
+                        console.error(`Error loading policy instance ${i} for stats:`, err);
+                        continue;
+                    }
+                }
+                
+                // Calculate claims stats
+                let totalClaims = 0;
+                let approvedClaims = 0;
+                
+                for (let i = 1; i < nextClaimId; i++) {
+                    try {
+                        const claim = await engineContract.claims(i);
+                        totalClaims++;
+                        if (claim.isApproved) approvedClaims++;
+                    } catch (err) {
+                        // Claim doesn't exist or other error, continue
+                        console.error(`Error loading claim ${i} for stats:`, err);
+                        continue;
+                    }
+                }
+                
+                // Update stats with real data
+                document.getElementById('activePoliciesCount').textContent = activePolicies;
+                document.getElementById('totalCoverageAmount').textContent = `$${Math.round(totalCoverage).toLocaleString()}`;
+                
+                try {
+                    // Get policy template count by iterating until we get an error
+                    let templateCount = 0;
+                    // We'll use the policyTemplateList array if it works, otherwise count manually
+                    try {
+                        const policyTemplateList = await engineContract.policyTemplateList();
+                        templateCount = policyTemplateList.length;
+                    } catch (error) {
+                        console.error('Error getting policy template list:', error);
+                        templateCount = 0;
+                    }
+                    document.getElementById('policyTypesCount').textContent = templateCount;
+                } catch (error) {
+                    console.error('Error getting policy template list:', error);
+                    document.getElementById('policyTypesCount').textContent = 0;
+                }
+                
+                document.getElementById('totalClaimsCount').textContent = totalClaims;
+                document.getElementById('collectedPremiums').textContent = '$0'; // Would need to track this separately
+                document.getElementById('claimsPaidAmount').textContent = `$${(approvedClaims * 1000).toLocaleString()}`; // Approximation
+                document.getElementById('activeValidatorsCount').textContent = validatorCount.toString();
+                
+                // Get available balance
+                try {
+                    const balance = await tokenContract.balanceOf(CONTRACT_ADDRESSES.ENGINE);
+                    document.getElementById('availableBalance').textContent = `${parseFloat(ethers.utils.formatEther(balance)).toLocaleString()} TST`;
+                } catch (error) {
+                    console.error('Error getting contract balance:', error);
+                    document.getElementById('availableBalance').textContent = '0 TST';
+                }
+            } catch (error) {
+                console.error('Error loading stats:', error);
+                showNotification('Failed to load statistics: ' + error.message, 'error');
+            }
+        }
+
+        // Buy a policy
+        // Register as policy holder
+        async function registerAsPolicyHolder() {
+            if (!engineContract || !signer) {
+                showNotification('Please connect your wallet first', 'error');
+                return;
+            }
+            
+            try {
+                showNotification('Registering as policy holder...', 'info');
+                
+                const tx = await engineContract.addPolicyHolder(userAddress);
+                await tx.wait();
+                
+                showNotification('Successfully registered as policy holder!', 'success');
+                
+                // Refresh user role to update the UI
+                await determineUserRole();
+            } catch (error) {
+                console.error('Error registering as policy holder:', error);
+                showNotification('Failed to register as policy holder: ' + error.message, 'error');
+            }
+        }
+
+        // Check if user is a registered policy holder
+        async function isPolicyHolder(address) {
+            try {
+                if (!engineContract) return false;
+                
+                // Get the number of policy holders by trying to access them
+                let i = 0;
+                while (true) {
+                    try {
+                        const policyHolder = await engineContract.policyHolders(i);
+                        if (policyHolder.toLowerCase() === address.toLowerCase()) {
+                            return true;
+                        }
+                        i++;
+                    } catch (err) {
+                        // Reached end of policy holders array
+                        break;
+                    }
+                }
+                return false;
+            } catch (error) {
+                console.error('Error checking policy holder status:', error);
+                return false;
+            }
+        }
+
+        async function buyPolicy(templateId) {
+            if (!engineContract || !signer) {
+                showNotification('Please connect your wallet first', 'error');
+                return;
+            }
+            
+            try {
+                // Check if user is registered as a policy holder
+                const isRegistered = await isPolicyHolder(userAddress);
+                if (!isRegistered) {
+                    showNotification('Registering you as a policy holder first...', 'info');
+                    await registerAsPolicyHolder();
+                }
+                
+                showNotification('Approving token transfer...', 'info');
+                
+                // First, approve the engine contract to spend tokens
+                const template = await engineContract.policyTemplates(templateId);
+                const monthlyPremium = template.monthlyPremium;
+                
+                const approveTx = await tokenContract.approve(
+                    CONTRACT_ADDRESSES.ENGINE,
+                    monthlyPremium
+                );
+                await approveTx.wait();
+                
+                showNotification('Purchasing policy...', 'info');
+                
+                // Buy the policy
+                const tx = await engineContract.buyPolicy(templateId);
+                await tx.wait();
+                
+                showNotification('Policy purchased successfully!', 'success');
+                await loadUserPolicies();
+                await loadStats();
+            } catch (error) {
+                console.error('Error buying policy:', error);
+                showNotification('Failed to purchase policy: ' + error.message, 'error');
+            }
+        }
+
+        // File a claim
+        async function fileClaim() {
+            if (!engineContract || !signer) {
+                showNotification('Please connect your wallet first', 'error');
+                return;
+            }
+            
+            try {
+                const policyId = document.getElementById('claimPolicySelect').value;
+                const reason = document.getElementById('claimReason').value;
+                
+                if (!policyId || !reason) {
+                    showNotification('Please select a policy and provide a reason', 'error');
+                    return;
+                }
+                
+                showNotification('Filing claim...', 'info');
+                
+                const tx = await engineContract.fileClaim(policyId, reason);
+                await tx.wait();
+                
+                showNotification('Claim filed successfully!', 'success');
+                document.getElementById('fileClaimForm').reset();
+                await loadUserClaims();
+                await loadPendingClaims(); // Refresh for validators
+                await loadStats();
+            } catch (error) {
+                console.error('Error filing claim:', error);
+                showNotification('Failed to file claim: ' + error.message, 'error');
+            }
+        }
+
+        // File a claim for a specific policy
+        async function fileClaimForPolicy(policyId) {
+            // Set the policy in the dropdown
+            document.getElementById('claimPolicySelect').innerHTML = `<option value="${policyId}">Policy #${policyId}</option>`;
+            // Switch to claims tab
+            switchTab('claims');
+            // Scroll to the form
+            document.getElementById('fileClaimForm').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Validate a claim
+        async function validateClaim(claimId, approval) {
+            if (!engineContract || !signer) {
+                showNotification('Please connect your wallet first', 'error');
+                return;
+            }
+            
+            try {
+                showNotification('Validating claim...', 'info');
+                
+                const tx = await engineContract.validateClaim(claimId, approval);
+                await tx.wait();
+                
+                const action = approval ? 'approved' : 'rejected';
+                showNotification(`Claim ${action} successfully!`, 'success');
+                await loadPendingClaims();
+                await loadUserClaims(); // Refresh for policy holders
+                await loadStats();
+            } catch (error) {
+                console.error('Error validating claim:', error);
+                showNotification('Failed to validate claim: ' + error.message, 'error');
+            }
+        }
+
+        // Make a payment
+        async function makePayment(policyId) {
+            if (!engineContract || !signer) {
+                showNotification('Please connect your wallet first', 'error');
+                return;
+            }
+            
+            try {
+                showNotification('Approving payment...', 'info');
+                
+                // Get payment info to determine amount
+                const paymentInfo = await engineContract.getPaymentInfo(policyId);
+                const monthlyPremium = paymentInfo.monthlyPremium;
+                
+                // First, approve the engine contract to spend tokens
+                const approveTx = await tokenContract.approve(
+                    CONTRACT_ADDRESSES.ENGINE,
+                    monthlyPremium
+                );
+                await approveTx.wait();
+                
+                showNotification('Making payment...', 'info');
+                
+                const tx = await engineContract.makeMonthlyPayment(policyId);
+                await tx.wait();
+                
+                showNotification('Payment made successfully!', 'success');
+                await loadUserPolicies();
+                await loadStats();
+            } catch (error) {
+                console.error('Error making payment:', error);
+                showNotification('Failed to make payment: ' + error.message, 'error');
+            }
+        }
+
+        // Cancel a policy
+        async function cancelPolicy(policyId) {
+            if (!engineContract || !signer) {
+                showNotification('Please connect your wallet first', 'error');
+                return;
+            }
+            
+            try {
+                showNotification('Cancelling policy...', 'info');
+                
+                const tx = await engineContract.cancelPolicy(policyId);
+                await tx.wait();
+                
+                showNotification('Policy cancelled successfully!', 'success');
+                await loadUserPolicies();
+                await loadStats();
+            } catch (error) {
+                console.error('Error cancelling policy:', error);
+                showNotification('Failed to cancel policy: ' + error.message, 'error');
+            }
+        }
+
+        // Create policy template
+        async function createPolicyTemplate() {
+            if (!engineContract || !signer) {
+                showNotification('Please connect your wallet first', 'error');
+                return;
+            }
+            
+            try {
+                const policyId = document.getElementById('policyId').value;
+                const coverageAmount = document.getElementById('coverageAmount').value;
+                const startDate = new Date(document.getElementById('startDate').value).getTime() / 1000;
+                const endDate = new Date(document.getElementById('endDate').value).getTime() / 1000;
+                const coverageType = document.getElementById('coverageType').value;
+                const isMonthly = document.getElementById('isMonthly').checked;
+                const monthlyPremium = document.getElementById('monthlyPremium').value;
+                
+                showNotification('Creating policy template...', 'info');
+                
+                const tx = await engineContract.createPolicyTemplate(
+                    policyId,
+                    ethers.utils.parseEther(coverageAmount),
+                    Math.floor(startDate),
+                    Math.floor(endDate),
+                    coverageType,
+                    isMonthly,
+                    ethers.utils.parseEther(monthlyPremium)
+                );
+                await tx.wait();
+                
+                showNotification('Policy template created successfully!', 'success');
+                document.getElementById('createPolicyForm').reset();
+                await loadPolicyTemplates();
+                await loadStats();
+            } catch (error) {
+                console.error('Error creating policy template:', error);
+                showNotification('Failed to create policy template: ' + error.message, 'error');
+            }
+        }
+
+        // Add validator
+        async function addValidator() {
+            if (!engineContract || !signer) {
+                showNotification('Please connect your wallet first', 'error');
+                return;
+            }
+            
+            try {
+                const validatorAddress = document.getElementById('validatorAddress').value;
+                
+                if (!ethers.utils.isAddress(validatorAddress)) {
+                    showNotification('Please enter a valid wallet address', 'error');
+                    return;
+                }
+                
+                showNotification('Adding validator...', 'info');
+                
+                const tx = await engineContract.addValidator(validatorAddress);
+                await tx.wait();
+                
+                showNotification('Validator added successfully!', 'success');
+                document.getElementById('addValidatorForm').reset();
+                await loadStats();
+            } catch (error) {
+                console.error('Error adding validator:', error);
+                showNotification('Failed to add validator: ' + error.message, 'error');
+            }
+        }
+
+        // Withdraw funds
+        async function withdrawFunds() {
+            if (!engineContract || !signer) {
+                showNotification('Please connect your wallet first', 'error');
+                return;
+            }
+            
+            try {
+                const amount = document.getElementById('withdrawAmount').value;
+                
+                if (!amount || amount <= 0) {
+                    showNotification('Please enter a valid amount', 'error');
+                    return;
+                }
+                
+                showNotification('Withdrawing funds...', 'info');
+                
+                const tx = await engineContract.withdrawTokens(ethers.utils.parseEther(amount));
+                await tx.wait();
+                
+                showNotification('Funds withdrawn successfully!', 'success');
+                document.getElementById('withdrawFundsForm').reset();
+                await loadStats();
+            } catch (error) {
+                console.error('Error withdrawing funds:', error);
+                showNotification('Failed to withdraw funds: ' + error.message, 'error');
+            }
+        }
+
+        // Switch tabs
+        function switchTab(tabName) {
+            // Hide all tab contents
+            const contents = document.querySelectorAll('.tab-content');
+            contents.forEach(content => content.classList.remove('active'));
+            
+            // Remove active class from all tabs
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            
+            // Show selected tab content
+            document.getElementById(tabName).classList.add('active');
+            
+            // Add active class to clicked tab (using event parameter)
+            if (event && event.target) {
+                event.target.classList.add('active');
+            }
+        }
+
+        // Show notification
+        function showNotification(message, type) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.className = 'notification ' + type;
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 5000);
+        }
+
+        // Form submission handlers (prevents page reload)
+        document.querySelectorAll('form').forEach(form => {
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {IERC20} from "lib/openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
 
 contract Engine{
     mapping(uint256 => string) public claimIdToClaims;
@@ -145,7 +145,7 @@ contract Engine{
     }
     
     // Admin function to create policy templates with monthly premium
-    function createPolicyTemplate(uint256 _policyId, uint256 _coverageAmount, uint256 _startDate, uint256 _endDate, string memory _coverageType, bool _isMonthly, uint256 _monthlyPremium) public onlyAdmin{
+    function createPolicyTemplate(uint256 _policyId, uint256 _coverageAmount, uint256 _startDate, uint256 _endDate, string memory _coverageType, bool _isMonthly, uint256 _monthlyPremium) public{
         PolicyTemplate memory newTemplate = PolicyTemplate({
             policyId: _policyId,
             coverageAmount: _coverageAmount,
@@ -249,6 +249,10 @@ contract Engine{
     // Admin function to withdraw collected tokens
     function withdrawTokens(uint256 _amount) public onlyAdmin {
         require(token.transfer(admin, _amount), "Token transfer failed");
+    }
+    // Function to get all policy templates
+    function getAllPolicyTemplates() public view returns (PolicyTemplate[] memory) {
+        return policyTemplateList;
     }
     
 }
