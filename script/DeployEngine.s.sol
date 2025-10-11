@@ -10,12 +10,12 @@ contract DeployEngine is Script {
         vm.startBroadcast();
         
         // Deploy test token with 1 million tokens (18 decimals)
-        TestToken token = new TestToken(1000000 * 10**18);
+        // TestToken token = new TestToken(1000000 * 10**18);
         
         // Deploy engine contract with token address
-        Engine engine = new Engine(address(token));
+        Engine engine = new Engine(0xc015Efb1CB95543687f46aEDB1fe062627B893B4);
         
-        console.log("TestToken deployed at:", address(token));
+        // console.log("TestToken deployed at:", address(token));
         console.log("Engine deployed at:", address(engine));
         
         vm.stopBroadcast();

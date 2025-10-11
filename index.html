@@ -87,6 +87,12 @@
             font-family: 'Courier New', monospace;
             font-size: 14px;
             color: #a5b4fc;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .wallet-address:hover {
+            border-color: rgba(99, 102, 241, 0.5);
         }
 
         .role-badge {
@@ -473,6 +479,14 @@
             border-color: rgba(239, 68, 68, 0.5);
         }
 
+        .notification.info {
+            border-color: rgba(59, 130, 246, 0.5);
+        }
+
+        .notification.warning {
+            border-color: rgba(251, 191, 36, 0.5);
+        }
+
         .loading {
             display: inline-block;
             width: 20px;
@@ -689,11 +703,11 @@
                     </div>
                     <div class="form-row">
                         <div class="form-group">
-                            <label class="form-label">Coverage Amount (TST)</label>
+                            <label class="form-label">Coverage Amount (USDT)</label>
                             <input type="number" class="form-input" id="coverageAmount" placeholder="e.g., 50000" step="0.01" required />
                         </div>
                         <div class="form-group">
-                            <label class="form-label">Monthly Premium (TST)</label>
+                            <label class="form-label">Monthly Premium (USDT)</label>
                             <input type="number" class="form-input" id="monthlyPremium" placeholder="e.g., 250" step="0.01" required />
                         </div>
                     </div>
@@ -734,7 +748,7 @@
                 </div>
                 <form id="withdrawFundsForm">
                     <div class="form-group">
-                        <label class="form-label">Available Balance: <span id="availableBalance">0 TST</span></label>
+                        <label class="form-label">Available Balance: <span id="availableBalance">0 USDT</span></label>
                         <input type="number" class="form-input" id="withdrawAmount" placeholder="Amount to withdraw" step="0.01" required />
                     </div>
                     <button type="submit" class="btn" id="withdrawBtn">Withdraw Tokens</button>
@@ -746,10 +760,10 @@
     <div class="notification" id="notification"></div>
 
     <script>
-        // Contract addresses (update these with your deployed addresses)
+        // Contract addresses (UPDATE THESE WITH YOUR DEPLOYED SEPOLIA ADDRESSES)
         const CONTRACT_ADDRESSES = {
-            TOKEN: "0x8464135c8F25Da09e49BC8782676a84730C318bC",
-            ENGINE: "0x71C95911E9a5D330f4D621842EC243EE1343292e"
+            TOKEN: "0xc015Efb1CB95543687f46aEDB1fe062627B893B4",
+            ENGINE: "0xa7d655D13158431a9AF339C2f1CA2b192dE2CE2a"
         };
 
         // Contract ABIs
@@ -762,683 +776,684 @@
 
         const ENGINE_ABI = [
             {
-            "type": "constructor",
-            "inputs": [
-                {
-                    "name": "_tokenAddress",
-                    "type": "address",
-                    "internalType": "address"
-                }
-            ],
-            "stateMutability": "nonpayable"
-        },
-        {
-            "type": "function",
-            "name": "addPolicyHolder",
-            "inputs": [
-                {
-                    "name": "_policyHolder",
-                    "type": "address",
-                    "internalType": "address"
-                }
-            ],
-            "outputs": [],
-            "stateMutability": "nonpayable"
-        },
-        {
-            "type": "function",
-            "name": "addValidator",
-            "inputs": [
-                {
-                    "name": "_validator",
-                    "type": "address",
-                    "internalType": "address"
-                }
-            ],
-            "outputs": [],
-            "stateMutability": "nonpayable"
-        },
-        {
-            "type": "function",
-            "name": "admin",
-            "inputs": [],
-            "outputs": [
-                {
-                    "name": "",
-                    "type": "address",
-                    "internalType": "address"
-                }
-            ],
-            "stateMutability": "view"
-        },
-        {
-            "type": "function",
-            "name": "buyPolicy",
-            "inputs": [
-                {
-                    "name": "_templateId",
-                    "type": "uint256",
-                    "internalType": "uint256"
-                }
-            ],
-            "outputs": [
-                {
-                    "name": "",
-                    "type": "uint256",
-                    "internalType": "uint256"
-                }
-            ],
-            "stateMutability": "nonpayable"
-        },
-        {
-            "type": "function",
-            "name": "cancelPolicy",
-            "inputs": [
-                {
-                    "name": "_instanceId",
-                    "type": "uint256",
-                    "internalType": "uint256"
-                }
-            ],
-            "outputs": [],
-            "stateMutability": "nonpayable"
-        },
-        {
-            "type": "function",
-            "name": "claimIdToClaims",
-            "inputs": [
-                {
-                    "name": "",
-                    "type": "uint256",
-                    "internalType": "uint256"
-                }
-            ],
-            "outputs": [
-                {
-                    "name": "",
-                    "type": "string",
-                    "internalType": "string"
-                }
-            ],
-            "stateMutability": "view"
-        },
-        {
-            "type": "function",
-            "name": "claims",
-            "inputs": [
-                {
-                    "name": "",
-                    "type": "uint256",
-                    "internalType": "uint256"
-                }
-            ],
-            "outputs": [
-                {
-                    "name": "claimId",
-                    "type": "uint256",
-                    "internalType": "uint256"
-                },
-                {
-                    "name": "policyId",
-                    "type": "uint256",
-                    "internalType": "uint256"
-                },
-                {
-                    "name": "reason",
-                    "type": "string",
-                    "internalType": "string"
-                },
-                {
-                    "name": "isApproved",
-                    "type": "bool",
-                    "internalType": "bool"
-                },
-                {
-                    "name": "approvalCount",
-                    "type": "uint256",
-                    "internalType": "uint256"
-                },
-                {
-                    "name": "rejectionCount",
-                    "type": "uint256",
-                    "internalType": "uint256"
-                }
-            ],
-            "stateMutability": "view"
-        },
-        {
-            "type": "function",
-            "name": "createPolicyTemplate",
-            "inputs": [
-                {
-                    "name": "_policyId",
-                    "type": "uint256",
-                    "internalType": "uint256"
-                },
-                {
-                    "name": "_coverageAmount",
-                    "type": "uint256",
-                    "internalType": "uint256"
-                },
-                {
-                    "name": "_startDate",
-                    "type": "uint256",
-                    "internalType": "uint256"
-                },
-                {
-                    "name": "_endDate",
-                    "type": "uint256",
-                    "internalType": "uint256"
-                },
-                {
-                    "name": "_coverageType",
-                    "type": "string",
-                    "internalType": "string"
-                },
-                {
-                    "name": "_isMonthly",
-                    "type": "bool",
-                    "internalType": "bool"
-                },
-                {
-                    "name": "_monthlyPremium",
-                    "type": "uint256",
-                    "internalType": "uint256"
-                }
-            ],
-            "outputs": [],
-            "stateMutability": "nonpayable"
-        },
-        {
-            "type": "function",
-            "name": "fileClaim",
-            "inputs": [
-                {
-                    "name": "_policyId",
-                    "type": "uint256",
-                    "internalType": "uint256"
-                },
-                {
-                    "name": "_reason",
-                    "type": "string",
-                    "internalType": "string"
-                }
-            ],
-            "outputs": [
-                {
-                    "name": "",
-                    "type": "uint256",
-                    "internalType": "uint256"
-                }
-            ],
-            "stateMutability": "nonpayable"
-        },
-        {
-            "type": "function",
-            "name": "getAllPolicyTemplates",
-            "inputs": [],
-            "outputs": [
-                {
-                    "name": "",
-                    "type": "tuple[]",
-                    "internalType": "struct Engine.PolicyTemplate[]",
-                    "components": [
-                        {
-                            "name": "policyId",
-                            "type": "uint256",
-                            "internalType": "uint256"
-                        },
-                        {
-                            "name": "coverageAmount",
-                            "type": "uint256",
-                            "internalType": "uint256"
-                        },
-                        {
-                            "name": "startDate",
-                            "type": "uint256",
-                            "internalType": "uint256"
-                        },
-                        {
-                            "name": "endDate",
-                            "type": "uint256",
-                            "internalType": "uint256"
-                        },
-                        {
-                            "name": "coverageType",
-                            "type": "string",
-                            "internalType": "string"
-                        },
-                        {
-                            "name": "isMonthly",
-                            "type": "bool",
-                            "internalType": "bool"
-                        },
-                        {
-                            "name": "monthlyPremium",
-                            "type": "uint256",
-                            "internalType": "uint256"
-                        }
-                    ]
-                }
-            ],
-            "stateMutability": "view"
-        },
-        {
-            "type": "function",
-            "name": "getClaimDetails",
-            "inputs": [
-                {
-                    "name": "_claimId",
-                    "type": "uint256",
-                    "internalType": "uint256"
-                }
-            ],
-            "outputs": [
-                {
-                    "name": "policyId",
-                    "type": "uint256",
-                    "internalType": "uint256"
-                },
-                {
-                    "name": "reason",
-                    "type": "string",
-                    "internalType": "string"
-                },
-                {
-                    "name": "isApproved",
-                    "type": "bool",
-                    "internalType": "bool"
-                }
-            ],
-            "stateMutability": "view"
-        },
-        {
-            "type": "function",
-            "name": "getClaimStatus",
-            "inputs": [
-                {
-                    "name": "_claimId",
-                    "type": "uint256",
-                    "internalType": "uint256"
-                }
-            ],
-            "outputs": [
-                {
-                    "name": "isApproved",
-                    "type": "bool",
-                    "internalType": "bool"
-                },
-                {
-                    "name": "approvalCount",
-                    "type": "uint256",
-                    "internalType": "uint256"
-                },
-                {
-                    "name": "rejectionCount",
-                    "type": "uint256",
-                    "internalType": "uint256"
-                }
-            ],
-            "stateMutability": "view"
-        },
-        {
-            "type": "function",
-            "name": "getPaymentInfo",
-            "inputs": [
-                {
-                    "name": "_instanceId",
-                    "type": "uint256",
-                    "internalType": "uint256"
-                }
-            ],
-            "outputs": [
-                {
-                    "name": "paymentsMade",
-                    "type": "uint256",
-                    "internalType": "uint256"
-                },
-                {
-                    "name": "nextPaymentDate",
-                    "type": "uint256",
-                    "internalType": "uint256"
-                },
-                {
-                    "name": "monthlyPremium",
-                    "type": "uint256",
-                    "internalType": "uint256"
-                }
-            ],
-            "stateMutability": "view"
-        },
-        {
-            "type": "function",
-            "name": "makeMonthlyPayment",
-            "inputs": [
-                {
-                    "name": "_instanceId",
-                    "type": "uint256",
-                    "internalType": "uint256"
-                }
-            ],
-            "outputs": [],
-            "stateMutability": "nonpayable"
-        },
-        {
-            "type": "function",
-            "name": "nextClaimId",
-            "inputs": [],
-            "outputs": [
-                {
-                    "name": "",
-                    "type": "uint256",
-                    "internalType": "uint256"
-                }
-            ],
-            "stateMutability": "view"
-        },
-        {
-            "type": "function",
-            "name": "nextInstanceId",
-            "inputs": [],
-            "outputs": [
-                {
-                    "name": "",
-                    "type": "uint256",
-                    "internalType": "uint256"
-                }
-            ],
-            "stateMutability": "view"
-        },
-        {
-            "type": "function",
-            "name": "policyHolders",
-            "inputs": [
-                {
-                    "name": "",
-                    "type": "uint256",
-                    "internalType": "uint256"
-                }
-            ],
-            "outputs": [
-                {
-                    "name": "",
-                    "type": "address",
-                    "internalType": "address"
-                }
-            ],
-            "stateMutability": "view"
-        },
-        {
-            "type": "function",
-            "name": "policyInstanceList",
-            "inputs": [
-                {
-                    "name": "",
-                    "type": "uint256",
-                    "internalType": "uint256"
-                }
-            ],
-            "outputs": [
-                {
-                    "name": "templateId",
-                    "type": "uint256",
-                    "internalType": "uint256"
-                },
-                {
-                    "name": "policyHolder",
-                    "type": "address",
-                    "internalType": "address"
-                },
-                {
-                    "name": "startDate",
-                    "type": "uint256",
-                    "internalType": "uint256"
-                },
-                {
-                    "name": "endDate",
-                    "type": "uint256",
-                    "internalType": "uint256"
-                },
-                {
-                    "name": "isActive",
-                    "type": "bool",
-                    "internalType": "bool"
-                },
-                {
-                    "name": "isClaimed",
-                    "type": "bool",
-                    "internalType": "bool"
-                },
-                {
-                    "name": "nextPaymentDate",
-                    "type": "uint256",
-                    "internalType": "uint256"
-                },
-                {
-                    "name": "paymentsMade",
-                    "type": "uint256",
-                    "internalType": "uint256"
-                }
-            ],
-            "stateMutability": "view"
-        },
-        {
-            "type": "function",
-            "name": "policyInstances",
-            "inputs": [
-                {
-                    "name": "",
-                    "type": "uint256",
-                    "internalType": "uint256"
-                }
-            ],
-            "outputs": [
-                {
-                    "name": "templateId",
-                    "type": "uint256",
-                    "internalType": "uint256"
-                },
-                {
-                    "name": "policyHolder",
-                    "type": "address",
-                    "internalType": "address"
-                },
-                {
-                    "name": "startDate",
-                    "type": "uint256",
-                    "internalType": "uint256"
-                },
-                {
-                    "name": "endDate",
-                    "type": "uint256",
-                    "internalType": "uint256"
-                },
-                {
-                    "name": "isActive",
-                    "type": "bool",
-                    "internalType": "bool"
-                },
-                {
-                    "name": "isClaimed",
-                    "type": "bool",
-                    "internalType": "bool"
-                },
-                {
-                    "name": "nextPaymentDate",
-                    "type": "uint256",
-                    "internalType": "uint256"
-                },
-                {
-                    "name": "paymentsMade",
-                    "type": "uint256",
-                    "internalType": "uint256"
-                }
-            ],
-            "stateMutability": "view"
-        },
-        {
-            "type": "function",
-            "name": "policyTemplateList",
-            "inputs": [
-                {
-                    "name": "",
-                    "type": "uint256",
-                    "internalType": "uint256"
-                }
-            ],
-            "outputs": [
-                {
-                    "name": "policyId",
-                    "type": "uint256",
-                    "internalType": "uint256"
-                },
-                {
-                    "name": "coverageAmount",
-                    "type": "uint256",
-                    "internalType": "uint256"
-                },
-                {
-                    "name": "startDate",
-                    "type": "uint256",
-                    "internalType": "uint256"
-                },
-                {
-                    "name": "endDate",
-                    "type": "uint256",
-                    "internalType": "uint256"
-                },
-                {
-                    "name": "coverageType",
-                    "type": "string",
-                    "internalType": "string"
-                },
-                {
-                    "name": "isMonthly",
-                    "type": "bool",
-                    "internalType": "bool"
-                },
-                {
-                    "name": "monthlyPremium",
-                    "type": "uint256",
-                    "internalType": "uint256"
-                }
-            ],
-            "stateMutability": "view"
-        },
-        {
-            "type": "function",
-            "name": "policyTemplates",
-            "inputs": [
-                {
-                    "name": "",
-                    "type": "uint256",
-                    "internalType": "uint256"
-                }
-            ],
-            "outputs": [
-                {
-                    "name": "policyId",
-                    "type": "uint256",
-                    "internalType": "uint256"
-                },
-                {
-                    "name": "coverageAmount",
-                    "type": "uint256",
-                    "internalType": "uint256"
-                },
-                {
-                    "name": "startDate",
-                    "type": "uint256",
-                    "internalType": "uint256"
-                },
-                {
-                    "name": "endDate",
-                    "type": "uint256",
-                    "internalType": "uint256"
-                },
-                {
-                    "name": "coverageType",
-                    "type": "string",
-                    "internalType": "string"
-                },
-                {
-                    "name": "isMonthly",
-                    "type": "bool",
-                    "internalType": "bool"
-                },
-                {
-                    "name": "monthlyPremium",
-                    "type": "uint256",
-                    "internalType": "uint256"
-                }
-            ],
-            "stateMutability": "view"
-        },
-        {
-            "type": "function",
-            "name": "token",
-            "inputs": [],
-            "outputs": [
-                {
-                    "name": "",
-                    "type": "address",
-                    "internalType": "contract IERC20"
-                }
-            ],
-            "stateMutability": "view"
-        },
-        {
-            "type": "function",
-            "name": "validateClaim",
-            "inputs": [
-                {
-                    "name": "_claimId",
-                    "type": "uint256",
-                    "internalType": "uint256"
-                },
-                {
-                    "name": "_approval",
-                    "type": "bool",
-                    "internalType": "bool"
-                }
-            ],
-            "outputs": [],
-            "stateMutability": "nonpayable"
-        },
-        {
-            "type": "function",
-            "name": "validators",
-            "inputs": [
-                {
-                    "name": "",
-                    "type": "uint256",
-                    "internalType": "uint256"
-                }
-            ],
-            "outputs": [
-                {
-                    "name": "",
-                    "type": "address",
-                    "internalType": "address"
-                }
-            ],
-            "stateMutability": "view"
-        },
-        {
-            "type": "function",
-            "name": "withdrawTokens",
-            "inputs": [
-                {
-                    "name": "_amount",
-                    "type": "uint256",
-                    "internalType": "uint256"
-                }
-            ],
-            "outputs": [],
-            "stateMutability": "nonpayable"
-        }
-    
-        ]      // Global variables
+                "type": "constructor",
+                "inputs": [
+                    {
+                        "name": "_tokenAddress",
+                        "type": "address",
+                        "internalType": "address"
+                    }
+                ],
+                "stateMutability": "nonpayable"
+            },
+            {
+                "type": "function",
+                "name": "addPolicyHolder",
+                "inputs": [
+                    {
+                        "name": "_policyHolder",
+                        "type": "address",
+                        "internalType": "address"
+                    }
+                ],
+                "outputs": [],
+                "stateMutability": "nonpayable"
+            },
+            {
+                "type": "function",
+                "name": "addValidator",
+                "inputs": [
+                    {
+                        "name": "_validator",
+                        "type": "address",
+                        "internalType": "address"
+                    }
+                ],
+                "outputs": [],
+                "stateMutability": "nonpayable"
+            },
+            {
+                "type": "function",
+                "name": "admin",
+                "inputs": [],
+                "outputs": [
+                    {
+                        "name": "",
+                        "type": "address",
+                        "internalType": "address"
+                    }
+                ],
+                "stateMutability": "view"
+            },
+            {
+                "type": "function",
+                "name": "buyPolicy",
+                "inputs": [
+                    {
+                        "name": "_templateId",
+                        "type": "uint256",
+                        "internalType": "uint256"
+                    }
+                ],
+                "outputs": [
+                    {
+                        "name": "",
+                        "type": "uint256",
+                        "internalType": "uint256"
+                    }
+                ],
+                "stateMutability": "nonpayable"
+            },
+            {
+                "type": "function",
+                "name": "cancelPolicy",
+                "inputs": [
+                    {
+                        "name": "_instanceId",
+                        "type": "uint256",
+                        "internalType": "uint256"
+                    }
+                ],
+                "outputs": [],
+                "stateMutability": "nonpayable"
+            },
+            {
+                "type": "function",
+                "name": "claimIdToClaims",
+                "inputs": [
+                    {
+                        "name": "",
+                        "type": "uint256",
+                        "internalType": "uint256"
+                    }
+                ],
+                "outputs": [
+                    {
+                        "name": "",
+                        "type": "string",
+                        "internalType": "string"
+                    }
+                ],
+                "stateMutability": "view"
+            },
+            {
+                "type": "function",
+                "name": "claims",
+                "inputs": [
+                    {
+                        "name": "",
+                        "type": "uint256",
+                        "internalType": "uint256"
+                    }
+                ],
+                "outputs": [
+                    {
+                        "name": "claimId",
+                        "type": "uint256",
+                        "internalType": "uint256"
+                    },
+                    {
+                        "name": "policyId",
+                        "type": "uint256",
+                        "internalType": "uint256"
+                    },
+                    {
+                        "name": "reason",
+                        "type": "string",
+                        "internalType": "string"
+                    },
+                    {
+                        "name": "isApproved",
+                        "type": "bool",
+                        "internalType": "bool"
+                    },
+                    {
+                        "name": "approvalCount",
+                        "type": "uint256",
+                        "internalType": "uint256"
+                    },
+                    {
+                        "name": "rejectionCount",
+                        "type": "uint256",
+                        "internalType": "uint256"
+                    }
+                ],
+                "stateMutability": "view"
+            },
+            {
+                "type": "function",
+                "name": "createPolicyTemplate",
+                "inputs": [
+                    {
+                        "name": "_policyId",
+                        "type": "uint256",
+                        "internalType": "uint256"
+                    },
+                    {
+                        "name": "_coverageAmount",
+                        "type": "uint256",
+                        "internalType": "uint256"
+                    },
+                    {
+                        "name": "_startDate",
+                        "type": "uint256",
+                        "internalType": "uint256"
+                    },
+                    {
+                        "name": "_endDate",
+                        "type": "uint256",
+                        "internalType": "uint256"
+                    },
+                    {
+                        "name": "_coverageType",
+                        "type": "string",
+                        "internalType": "string"
+                    },
+                    {
+                        "name": "_isMonthly",
+                        "type": "bool",
+                        "internalType": "bool"
+                    },
+                    {
+                        "name": "_monthlyPremium",
+                        "type": "uint256",
+                        "internalType": "uint256"
+                    }
+                ],
+                "outputs": [],
+                "stateMutability": "nonpayable"
+            },
+            {
+                "type": "function",
+                "name": "fileClaim",
+                "inputs": [
+                    {
+                        "name": "_policyId",
+                        "type": "uint256",
+                        "internalType": "uint256"
+                    },
+                    {
+                        "name": "_reason",
+                        "type": "string",
+                        "internalType": "string"
+                    }
+                ],
+                "outputs": [
+                    {
+                        "name": "",
+                        "type": "uint256",
+                        "internalType": "uint256"
+                    }
+                ],
+                "stateMutability": "nonpayable"
+            },
+            {
+                "type": "function",
+                "name": "getAllPolicyTemplates",
+                "inputs": [],
+                "outputs": [
+                    {
+                        "name": "",
+                        "type": "tuple[]",
+                        "internalType": "struct Engine.PolicyTemplate[]",
+                        "components": [
+                            {
+                                "name": "policyId",
+                                "type": "uint256",
+                                "internalType": "uint256"
+                            },
+                            {
+                                "name": "coverageAmount",
+                                "type": "uint256",
+                                "internalType": "uint256"
+                            },
+                            {
+                                "name": "startDate",
+                                "type": "uint256",
+                                "internalType": "uint256"
+                            },
+                            {
+                                "name": "endDate",
+                                "type": "uint256",
+                                "internalType": "uint256"
+                            },
+                            {
+                                "name": "coverageType",
+                                "type": "string",
+                                "internalType": "string"
+                            },
+                            {
+                                "name": "isMonthly",
+                                "type": "bool",
+                                "internalType": "bool"
+                            },
+                            {
+                                "name": "monthlyPremium",
+                                "type": "uint256",
+                                "internalType": "uint256"
+                            }
+                        ]
+                    }
+                ],
+                "stateMutability": "view"
+            },
+            {
+                "type": "function",
+                "name": "getClaimDetails",
+                "inputs": [
+                    {
+                        "name": "_claimId",
+                        "type": "uint256",
+                        "internalType": "uint256"
+                    }
+                ],
+                "outputs": [
+                    {
+                        "name": "policyId",
+                        "type": "uint256",
+                        "internalType": "uint256"
+                    },
+                    {
+                        "name": "reason",
+                        "type": "string",
+                        "internalType": "string"
+                    },
+                    {
+                        "name": "isApproved",
+                        "type": "bool",
+                        "internalType": "bool"
+                    }
+                ],
+                "stateMutability": "view"
+            },
+            {
+                "type": "function",
+                "name": "getClaimStatus",
+                "inputs": [
+                    {
+                        "name": "_claimId",
+                        "type": "uint256",
+                        "internalType": "uint256"
+                    }
+                ],
+                "outputs": [
+                    {
+                        "name": "isApproved",
+                        "type": "bool",
+                        "internalType": "bool"
+                    },
+                    {
+                        "name": "approvalCount",
+                        "type": "uint256",
+                        "internalType": "uint256"
+                    },
+                    {
+                        "name": "rejectionCount",
+                        "type": "uint256",
+                        "internalType": "uint256"
+                    }
+                ],
+                "stateMutability": "view"
+            },
+            {
+                "type": "function",
+                "name": "getPaymentInfo",
+                "inputs": [
+                    {
+                        "name": "_instanceId",
+                        "type": "uint256",
+                        "internalType": "uint256"
+                    }
+                ],
+                "outputs": [
+                    {
+                        "name": "paymentsMade",
+                        "type": "uint256",
+                        "internalType": "uint256"
+                    },
+                    {
+                        "name": "nextPaymentDate",
+                        "type": "uint256",
+                        "internalType": "uint256"
+                    },
+                    {
+                        "name": "monthlyPremium",
+                        "type": "uint256",
+                        "internalType": "uint256"
+                    }
+                ],
+                "stateMutability": "view"
+            },
+            {
+                "type": "function",
+                "name": "makeMonthlyPayment",
+                "inputs": [
+                    {
+                        "name": "_instanceId",
+                        "type": "uint256",
+                        "internalType": "uint256"
+                    }
+                ],
+                "outputs": [],
+                "stateMutability": "nonpayable"
+            },
+            {
+                "type": "function",
+                "name": "nextClaimId",
+                "inputs": [],
+                "outputs": [
+                    {
+                        "name": "",
+                        "type": "uint256",
+                        "internalType": "uint256"
+                    }
+                ],
+                "stateMutability": "view"
+            },
+            {
+                "type": "function",
+                "name": "nextInstanceId",
+                "inputs": [],
+                "outputs": [
+                    {
+                        "name": "",
+                        "type": "uint256",
+                        "internalType": "uint256"
+                    }
+                ],
+                "stateMutability": "view"
+            },
+            {
+                "type": "function",
+                "name": "policyHolders",
+                "inputs": [
+                    {
+                        "name": "",
+                        "type": "uint256",
+                        "internalType": "uint256"
+                    }
+                ],
+                "outputs": [
+                    {
+                        "name": "",
+                        "type": "address",
+                        "internalType": "address"
+                    }
+                ],
+                "stateMutability": "view"
+            },
+            {
+                "type": "function",
+                "name": "policyInstanceList",
+                "inputs": [
+                    {
+                        "name": "",
+                        "type": "uint256",
+                        "internalType": "uint256"
+                    }
+                ],
+                "outputs": [
+                    {
+                        "name": "templateId",
+                        "type": "uint256",
+                        "internalType": "uint256"
+                    },
+                    {
+                        "name": "policyHolder",
+                        "type": "address",
+                        "internalType": "address"
+                    },
+                    {
+                        "name": "startDate",
+                        "type": "uint256",
+                        "internalType": "uint256"
+                    },
+                    {
+                        "name": "endDate",
+                        "type": "uint256",
+                        "internalType": "uint256"
+                    },
+                    {
+                        "name": "isActive",
+                        "type": "bool",
+                        "internalType": "bool"
+                    },
+                    {
+                        "name": "isClaimed",
+                        "type": "bool",
+                        "internalType": "bool"
+                    },
+                    {
+                        "name": "nextPaymentDate",
+                        "type": "uint256",
+                        "internalType": "uint256"
+                    },
+                    {
+                        "name": "paymentsMade",
+                        "type": "uint256",
+                        "internalType": "uint256"
+                    }
+                ],
+                "stateMutability": "view"
+            },
+            {
+                "type": "function",
+                "name": "policyInstances",
+                "inputs": [
+                    {
+                        "name": "",
+                        "type": "uint256",
+                        "internalType": "uint256"
+                    }
+                ],
+                "outputs": [
+                    {
+                        "name": "templateId",
+                        "type": "uint256",
+                        "internalType": "uint256"
+                    },
+                    {
+                        "name": "policyHolder",
+                        "type": "address",
+                        "internalType": "address"
+                    },
+                    {
+                        "name": "startDate",
+                        "type": "uint256",
+                        "internalType": "uint256"
+                    },
+                    {
+                        "name": "endDate",
+                        "type": "uint256",
+                        "internalType": "uint256"
+                    },
+                    {
+                        "name": "isActive",
+                        "type": "bool",
+                        "internalType": "bool"
+                    },
+                    {
+                        "name": "isClaimed",
+                        "type": "bool",
+                        "internalType": "bool"
+                    },
+                    {
+                        "name": "nextPaymentDate",
+                        "type": "uint256",
+                        "internalType": "uint256"
+                    },
+                    {
+                        "name": "paymentsMade",
+                        "type": "uint256",
+                        "internalType": "uint256"
+                    }
+                ],
+                "stateMutability": "view"
+            },
+            {
+                "type": "function",
+                "name": "policyTemplateList",
+                "inputs": [
+                    {
+                        "name": "",
+                        "type": "uint256",
+                        "internalType": "uint256"
+                    }
+                ],
+                "outputs": [
+                    {
+                        "name": "policyId",
+                        "type": "uint256",
+                        "internalType": "uint256"
+                    },
+                    {
+                        "name": "coverageAmount",
+                        "type": "uint256",
+                        "internalType": "uint256"
+                    },
+                    {
+                        "name": "startDate",
+                        "type": "uint256",
+                        "internalType": "uint256"
+                    },
+                    {
+                        "name": "endDate",
+                        "type": "uint256",
+                        "internalType": "uint256"
+                    },
+                    {
+                        "name": "coverageType",
+                        "type": "string",
+                        "internalType": "string"
+                    },
+                    {
+                        "name": "isMonthly",
+                        "type": "bool",
+                        "internalType": "bool"
+                    },
+                    {
+                        "name": "monthlyPremium",
+                        "type": "uint256",
+                        "internalType": "uint256"
+                    }
+                ],
+                "stateMutability": "view"
+            },
+            {
+                "type": "function",
+                "name": "policyTemplates",
+                "inputs": [
+                    {
+                        "name": "",
+                        "type": "uint256",
+                        "internalType": "uint256"
+                    }
+                ],
+                "outputs": [
+                    {
+                        "name": "policyId",
+                        "type": "uint256",
+                        "internalType": "uint256"
+                    },
+                    {
+                        "name": "coverageAmount",
+                        "type": "uint256",
+                        "internalType": "uint256"
+                    },
+                    {
+                        "name": "startDate",
+                        "type": "uint256",
+                        "internalType": "uint256"
+                    },
+                    {
+                        "name": "endDate",
+                        "type": "uint256",
+                        "internalType": "uint256"
+                    },
+                    {
+                        "name": "coverageType",
+                        "type": "string",
+                        "internalType": "string"
+                    },
+                    {
+                        "name": "isMonthly",
+                        "type": "bool",
+                        "internalType": "bool"
+                    },
+                    {
+                        "name": "monthlyPremium",
+                        "type": "uint256",
+                        "internalType": "uint256"
+                    }
+                ],
+                "stateMutability": "view"
+            },
+            {
+                "type": "function",
+                "name": "token",
+                "inputs": [],
+                "outputs": [
+                    {
+                        "name": "",
+                        "type": "address",
+                        "internalType": "contract IERC20"
+                    }
+                ],
+                "stateMutability": "view"
+            },
+            {
+                "type": "function",
+                "name": "validateClaim",
+                "inputs": [
+                    {
+                        "name": "_claimId",
+                        "type": "uint256",
+                        "internalType": "uint256"
+                    },
+                    {
+                        "name": "_approval",
+                        "type": "bool",
+                        "internalType": "bool"
+                    }
+                ],
+                "outputs": [],
+                "stateMutability": "nonpayable"
+            },
+            {
+                "type": "function",
+                "name": "validators",
+                "inputs": [
+                    {
+                        "name": "",
+                        "type": "uint256",
+                        "internalType": "uint256"
+                    }
+                ],
+                "outputs": [
+                    {
+                        "name": "",
+                        "type": "address",
+                        "internalType": "address"
+                    }
+                ],
+                "stateMutability": "view"
+            },
+            {
+                "type": "function",
+                "name": "withdrawTokens",
+                "inputs": [
+                    {
+                        "name": "_amount",
+                        "type": "uint256",
+                        "internalType": "uint256"
+                    }
+                ],
+                "outputs": [],
+                "stateMutability": "nonpayable"
+            }
+        ];
+
+        // Global variables
         let provider;
         let signer;
         let tokenContract;
@@ -1510,10 +1525,10 @@
                 const currentChainId = parseInt(chainId, 16);
                 console.log('Current chain ID:', chainId, '(Decimal:', currentChainId, ')');
                 
-                // Check if we're on the correct network (31337 = local Anvil)
-                if (currentChainId !== 31337) {
-                    showNotification('Please switch to Local Anvil network (Chain ID: 31337) in MetaMask', 'warning');
-                    await switchToLocalNetwork();
+                // Check if we're on the correct network (11155111 = Sepolia)
+                if (currentChainId !== 11155111) {
+                    showNotification('Please switch to Sepolia testnet (Chain ID: 11155111) in MetaMask', 'warning');
+                    await switchToSepoliaNetwork();
                     return;
                 }
                 
@@ -1541,12 +1556,12 @@
             }
         }
 
-        // Switch to local network
-        async function switchToLocalNetwork() {
+        // Switch to Sepolia network
+        async function switchToSepoliaNetwork() {
             try {
                 await ethereum.request({
                     method: 'wallet_switchEthereumChain',
-                    params: [{ chainId: '0x7a69' }], // 31337 in hex
+                    params: [{ chainId: '0xaa36a7' }], // 11155111 in hex
                 });
             } catch (switchError) {
                 // This error code indicates that the chain has not been added to MetaMask
@@ -1555,24 +1570,24 @@
                         await ethereum.request({
                             method: 'wallet_addEthereumChain',
                             params: [{
-                                chainId: '0x7a69', // 31337
-                                chainName: 'Local Anvil',
-                                rpcUrls: ['http://127.0.0.1:8545'],
+                                chainId: '0xaa36a7', // 11155111
+                                chainName: 'Sepolia Testnet',
+                                rpcUrls: ['https://sepolia.infura.io/v3/'],
                                 nativeCurrency: {
-                                    name: 'Ethereum',
+                                    name: 'Sepolia ETH',
                                     symbol: 'ETH',
                                     decimals: 18
                                 },
-                                blockExplorerUrls: null
+                                blockExplorerUrls: ['https://sepolia.etherscan.io']
                             }],
                         });
                     } catch (addError) {
-                        console.error('Failed to add local network:', addError);
-                        showNotification('Failed to add Local Anvil network. Please add it manually in MetaMask.', 'error');
+                        console.error('Failed to add Sepolia network:', addError);
+                        showNotification('Failed to add Sepolia testnet. Please add it manually in MetaMask.', 'error');
                     }
                 } else {
                     console.error('Failed to switch network:', switchError);
-                    showNotification('Failed to switch to Local Anvil network. Please switch manually in MetaMask.', 'error');
+                    showNotification('Failed to switch to Sepolia testnet. Please switch manually in MetaMask.', 'error');
                 }
             }
         }
@@ -1738,11 +1753,11 @@
                             
                             policyCard.innerHTML = `
                                 <div class="policy-type">${template.coverageType}</div>
-                                <div class="policy-amount">${parseFloat(ethers.utils.formatEther(template.coverageAmount)).toLocaleString()} TST</div>
+                                <div class="policy-amount">${parseFloat(ethers.utils.formatEther(template.coverageAmount)).toLocaleString()} USDT</div>
                                 <div class="policy-details">
                                     <div class="policy-detail">
                                         <span class="policy-detail-label">Monthly Premium</span>
-                                        <span class="policy-detail-value">${parseFloat(ethers.utils.formatEther(template.monthlyPremium)).toLocaleString()} TST</span>
+                                        <span class="policy-detail-value">${parseFloat(ethers.utils.formatEther(template.monthlyPremium)).toLocaleString()} USDT</span>
                                     </div>
                                     <div class="policy-detail">
                                         <span class="policy-detail-label">Duration</span>
@@ -1832,7 +1847,7 @@
                             if (instance.isActive && !instance.isClaimed) {
                                 const option = document.createElement('option');
                                 option.value = i;
-                                option.textContent = `#${i} - ${template.coverageType} (${policyData.amount} TST)`;
+                                option.textContent = `#${i} - ${template.coverageType} (${policyData.amount} USDT)`;
                                 claimSelect.appendChild(option);
                             }
                         }
@@ -1859,7 +1874,7 @@
                     policyCard.className = 'policy-card';
                     policyCard.innerHTML = `
                         <div class="policy-type">${policy.type}</div>
-                        <div class="policy-amount">${policy.amount} TST</div>
+                        <div class="policy-amount">${policy.amount} USDT</div>
                         <div class="policy-details">
                             <div class="policy-detail">
                                 <span class="policy-detail-label">Policy ID</span>
@@ -1954,7 +1969,7 @@
                                 id: claim.claimId.toString(),
                                 policyId: claim.policyId.toString(),
                                 policyType: policyTemplate.coverageType,
-                                submitted: "N/A", // Would need events to get exact submission date
+                                submitted: "N/A",
                                 approvals: claim.approvalCount.toString(),
                                 rejections: claim.rejectionCount.toString(),
                                 reason: claim.reason,
@@ -1963,7 +1978,6 @@
                             });
                         }
                     } catch (err) {
-                        // Claim doesn't exist or other error, continue
                         console.error(`Error loading claim ${i}:`, err);
                         continue;
                     }
@@ -2022,20 +2036,16 @@
             }
         }
 
-        // Load pending claims for validators with improved error handling
+        // Load pending claims for validators
         async function loadPendingClaims() {
             try {
                 const container = document.getElementById('pendingClaimsContainer');
-                
-                // Clear existing content
                 container.innerHTML = '';
                 
-                // Check if user is a validator
                 let validatorCount = 0;
                 let isValidator = false;
                 
                 try {
-                    // Count validators by trying to access them until we get an error
                     while (true) {
                         try {
                             const validator = await engineContract.validators(validatorCount);
@@ -2044,7 +2054,6 @@
                             }
                             validatorCount++;
                         } catch (err) {
-                            // Reached end of validators array
                             break;
                         }
                     }
@@ -2063,34 +2072,26 @@
                     return;
                 }
                 
-                // Get pending claims from contract
                 let nextClaimId;
                 try {
                     nextClaimId = await engineContract.nextClaimId();
                 } catch (error) {
                     console.error('Error getting nextClaimId:', error);
-                    showNotification('Failed to load claims: Contract not accessible', 'error');
                     return;
                 }
                 
                 const claims = [];
                 
-                // Iterate through possible claim IDs
                 for (let i = 1; i < nextClaimId; i++) {
                     try {
                         const claim = await engineContract.claims(i);
-                        // Check if claim is not yet approved and has been filed
-                        if (!claim.isApproved && (parseInt(claim.approvalCount) > 0 || parseInt(claim.rejectionCount) > 0 || true)) {
+                        if (!claim.isApproved) {
                             const policyInstance = await engineContract.policyInstances(claim.policyId);
-                            // Ensure templateId is valid before calling policyTemplates
                             if (policyInstance.templateId === undefined || policyInstance.templateId === null || policyInstance.templateId === 0) {
                                 continue;
                             }
                             
                             const policyTemplate = await engineContract.policyTemplates(policyInstance.templateId);
-                            
-                            // Check if current validator has voted
-                            // Since we can't directly access the mapping, we'll assume they haven't voted
                             const hasVoted = false;
                             
                             claims.push({
@@ -2105,7 +2106,6 @@
                             });
                         }
                     } catch (err) {
-                        // Claim doesn't exist or other error, continue
                         console.error(`Error loading pending claim ${i}:`, err);
                         continue;
                     }
@@ -2138,7 +2138,7 @@
                         <div class="policy-details">
                             <div class="policy-detail">
                                 <span class="policy-detail-label">Coverage Amount</span>
-                                <span class="policy-detail-value">${claim.amount} TST</span>
+                                <span class="policy-detail-value">${claim.amount} USDT</span>
                             </div>
                             <div class="policy-detail">
                                 <span class="policy-detail-label">Current Votes</span>
@@ -2166,49 +2166,41 @@
             }
         }
 
-        // Load statistics with improved error handling
+        // Load statistics
         async function loadStats() {
             try {
-                // Verify contract is connected
                 if (!engineContract) {
                     throw new Error('Contract not initialized');
                 }
                 
-                // Get real stats from contract with error handling
                 let nextInstanceId, nextClaimId, validatorCount;
                 
                 try {
                     nextInstanceId = await engineContract.nextInstanceId();
                 } catch (error) {
-                    console.error('Error getting nextInstanceId:', error);
-                    nextInstanceId = 1; // Default fallback
+                    nextInstanceId = 1;
                 }
                 
                 try {
                     nextClaimId = await engineContract.nextClaimId();
                 } catch (error) {
-                    console.error('Error getting nextClaimId:', error);
-                    nextClaimId = 1; // Default fallback
+                    nextClaimId = 1;
                 }
                 
                 try {
-                    // Count validators by trying to access them until we get an error
                     validatorCount = 0;
                     while (true) {
                         try {
                             await engineContract.validators(validatorCount);
                             validatorCount++;
                         } catch (err) {
-                            // Reached end of validators array
                             break;
                         }
                     }
                 } catch (error) {
-                    console.error('Error getting validator count:', error);
-                    validatorCount = 0; // Default fallback
+                    validatorCount = 0;
                 }
                 
-                // Calculate active policies
                 let activePolicies = 0;
                 let totalCoverage = 0;
                 
@@ -2216,7 +2208,6 @@
                     try {
                         const instance = await engineContract.policyInstances(i);
                         if (instance.isActive) {
-                            // Ensure templateId is valid before calling policyTemplates
                             if (instance.templateId === undefined || instance.templateId === null || instance.templateId === 0) {
                                 continue;
                             }
@@ -2226,13 +2217,10 @@
                             activePolicies++;
                         }
                     } catch (err) {
-                        // Policy doesn't exist or other error, continue
-                        console.error(`Error loading policy instance ${i} for stats:`, err);
                         continue;
                     }
                 }
                 
-                // Calculate claims stats
                 let totalClaims = 0;
                 let approvedClaims = 0;
                 
@@ -2242,53 +2230,36 @@
                         totalClaims++;
                         if (claim.isApproved) approvedClaims++;
                     } catch (err) {
-                        // Claim doesn't exist or other error, continue
-                        console.error(`Error loading claim ${i} for stats:`, err);
                         continue;
                     }
                 }
                 
-                // Update stats with real data
                 document.getElementById('activePoliciesCount').textContent = activePolicies;
-                document.getElementById('totalCoverageAmount').textContent = `$${Math.round(totalCoverage).toLocaleString()}`;
+                document.getElementById('totalCoverageAmount').textContent = `${Math.round(totalCoverage).toLocaleString()}`;
                 
                 try {
-                    // Get policy template count by iterating until we get an error
-                    let templateCount = 0;
-                    // We'll use the policyTemplateList array if it works, otherwise count manually
-                    try {
-                        const policyTemplateList = await engineContract.policyTemplateList();
-                        templateCount = policyTemplateList.length;
-                    } catch (error) {
-                        console.error('Error getting policy template list:', error);
-                        templateCount = 0;
-                    }
-                    document.getElementById('policyTypesCount').textContent = templateCount;
+                    const templates = await engineContract.getAllPolicyTemplates();
+                    document.getElementById('policyTypesCount').textContent = templates.length;
                 } catch (error) {
-                    console.error('Error getting policy template list:', error);
                     document.getElementById('policyTypesCount').textContent = 0;
                 }
                 
                 document.getElementById('totalClaimsCount').textContent = totalClaims;
-                document.getElementById('collectedPremiums').textContent = '$0'; // Would need to track this separately
-                document.getElementById('claimsPaidAmount').textContent = `$${(approvedClaims * 1000).toLocaleString()}`; // Approximation
+                document.getElementById('collectedPremiums').textContent = '$0';
+                document.getElementById('claimsPaidAmount').textContent = `${(approvedClaims * 1000).toLocaleString()}`;
                 document.getElementById('activeValidatorsCount').textContent = validatorCount.toString();
                 
-                // Get available balance
                 try {
                     const balance = await tokenContract.balanceOf(CONTRACT_ADDRESSES.ENGINE);
-                    document.getElementById('availableBalance').textContent = `${parseFloat(ethers.utils.formatEther(balance)).toLocaleString()} TST`;
+                    document.getElementById('availableBalance').textContent = `${parseFloat(ethers.utils.formatEther(balance)).toLocaleString()} USDT`;
                 } catch (error) {
-                    console.error('Error getting contract balance:', error);
-                    document.getElementById('availableBalance').textContent = '0 TST';
+                    document.getElementById('availableBalance').textContent = '0 USDT';
                 }
             } catch (error) {
                 console.error('Error loading stats:', error);
-                showNotification('Failed to load statistics: ' + error.message, 'error');
             }
         }
 
-        // Buy a policy
         // Register as policy holder
         async function registerAsPolicyHolder() {
             if (!engineContract || !signer) {
@@ -2298,17 +2269,13 @@
             
             try {
                 showNotification('Registering as policy holder...', 'info');
-                
                 const tx = await engineContract.addPolicyHolder(userAddress);
                 await tx.wait();
-                
                 showNotification('Successfully registered as policy holder!', 'success');
-                
-                // Refresh user role to update the UI
                 await determineUserRole();
             } catch (error) {
                 console.error('Error registering as policy holder:', error);
-                showNotification('Failed to register as policy holder: ' + error.message, 'error');
+                showNotification('Failed to register: ' + error.message, 'error');
             }
         }
 
@@ -2316,8 +2283,6 @@
         async function isPolicyHolder(address) {
             try {
                 if (!engineContract) return false;
-                
-                // Get the number of policy holders by trying to access them
                 let i = 0;
                 while (true) {
                     try {
@@ -2327,17 +2292,16 @@
                         }
                         i++;
                     } catch (err) {
-                        // Reached end of policy holders array
                         break;
                     }
                 }
                 return false;
             } catch (error) {
-                console.error('Error checking policy holder status:', error);
                 return false;
             }
         }
 
+        // Buy a policy
         async function buyPolicy(templateId) {
             if (!engineContract || !signer) {
                 showNotification('Please connect your wallet first', 'error');
@@ -2345,7 +2309,6 @@
             }
             
             try {
-                // Check if user is registered as a policy holder
                 const isRegistered = await isPolicyHolder(userAddress);
                 if (!isRegistered) {
                     showNotification('Registering you as a policy holder first...', 'info');
@@ -2353,20 +2316,13 @@
                 }
                 
                 showNotification('Approving token transfer...', 'info');
-                
-                // First, approve the engine contract to spend tokens
                 const template = await engineContract.policyTemplates(templateId);
                 const monthlyPremium = template.monthlyPremium;
                 
-                const approveTx = await tokenContract.approve(
-                    CONTRACT_ADDRESSES.ENGINE,
-                    monthlyPremium
-                );
+                const approveTx = await tokenContract.approve(CONTRACT_ADDRESSES.ENGINE, monthlyPremium);
                 await approveTx.wait();
                 
                 showNotification('Purchasing policy...', 'info');
-                
-                // Buy the policy
                 const tx = await engineContract.buyPolicy(templateId);
                 await tx.wait();
                 
@@ -2396,14 +2352,13 @@
                 }
                 
                 showNotification('Filing claim...', 'info');
-                
                 const tx = await engineContract.fileClaim(policyId, reason);
                 await tx.wait();
                 
                 showNotification('Claim filed successfully!', 'success');
                 document.getElementById('fileClaimForm').reset();
                 await loadUserClaims();
-                await loadPendingClaims(); // Refresh for validators
+                await loadPendingClaims();
                 await loadStats();
             } catch (error) {
                 console.error('Error filing claim:', error);
@@ -2413,11 +2368,8 @@
 
         // File a claim for a specific policy
         async function fileClaimForPolicy(policyId) {
-            // Set the policy in the dropdown
-            document.getElementById('claimPolicySelect').innerHTML = `<option value="${policyId}">Policy #${policyId}</option>`;
-            // Switch to claims tab
+            document.getElementById('claimPolicySelect').value = policyId;
             switchTab('claims');
-            // Scroll to the form
             document.getElementById('fileClaimForm').scrollIntoView({ behavior: 'smooth' });
         }
 
@@ -2430,14 +2382,13 @@
             
             try {
                 showNotification('Validating claim...', 'info');
-                
                 const tx = await engineContract.validateClaim(claimId, approval);
                 await tx.wait();
                 
                 const action = approval ? 'approved' : 'rejected';
                 showNotification(`Claim ${action} successfully!`, 'success');
                 await loadPendingClaims();
-                await loadUserClaims(); // Refresh for policy holders
+                await loadUserClaims();
                 await loadStats();
             } catch (error) {
                 console.error('Error validating claim:', error);
@@ -2454,20 +2405,13 @@
             
             try {
                 showNotification('Approving payment...', 'info');
-                
-                // Get payment info to determine amount
                 const paymentInfo = await engineContract.getPaymentInfo(policyId);
                 const monthlyPremium = paymentInfo.monthlyPremium;
                 
-                // First, approve the engine contract to spend tokens
-                const approveTx = await tokenContract.approve(
-                    CONTRACT_ADDRESSES.ENGINE,
-                    monthlyPremium
-                );
+                const approveTx = await tokenContract.approve(CONTRACT_ADDRESSES.ENGINE, monthlyPremium);
                 await approveTx.wait();
                 
                 showNotification('Making payment...', 'info');
-                
                 const tx = await engineContract.makeMonthlyPayment(policyId);
                 await tx.wait();
                 
@@ -2489,7 +2433,6 @@
             
             try {
                 showNotification('Cancelling policy...', 'info');
-                
                 const tx = await engineContract.cancelPolicy(policyId);
                 await tx.wait();
                 
@@ -2557,7 +2500,6 @@
                 }
                 
                 showNotification('Adding validator...', 'info');
-                
                 const tx = await engineContract.addValidator(validatorAddress);
                 await tx.wait();
                 
@@ -2586,7 +2528,6 @@
                 }
                 
                 showNotification('Withdrawing funds...', 'info');
-                
                 const tx = await engineContract.withdrawTokens(ethers.utils.parseEther(amount));
                 await tx.wait();
                 
@@ -2601,18 +2542,14 @@
 
         // Switch tabs
         function switchTab(tabName) {
-            // Hide all tab contents
             const contents = document.querySelectorAll('.tab-content');
             contents.forEach(content => content.classList.remove('active'));
             
-            // Remove active class from all tabs
             const tabs = document.querySelectorAll('.tab');
             tabs.forEach(tab => tab.classList.remove('active'));
             
-            // Show selected tab content
             document.getElementById(tabName).classList.add('active');
             
-            // Add active class to clicked tab (using event parameter)
             if (event && event.target) {
                 event.target.classList.add('active');
             }
@@ -2629,13 +2566,6 @@
                 notification.classList.remove('show');
             }, 5000);
         }
-
-        // Form submission handlers (prevents page reload)
-        document.querySelectorAll('form').forEach(form => {
-            form.addEventListener('submit', (e) => {
-                e.preventDefault();
-            });
-        });
     </script>
 </body>
 </html>
